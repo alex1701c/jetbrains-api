@@ -3,7 +3,7 @@ namespace JetbrainsAPI {
      * Get all applications with manual configuration and file watchers
      * @param config
      */
-    QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config) {
+    QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty = true) {
         QList<JetbrainsApplication *> appList;
         QList<JetbrainsApplication *> automaticAppList;
         const auto mappingMap = config.group(Config::customMappingGroup).entryMap();
@@ -20,7 +20,7 @@ namespace JetbrainsAPI {
                     customMappedApp->parseXMLFile(xmlConfigFile.readAll());
                     // Add path for filewatcher
                     customMappedApp->addPath(mappingMap.value(p.second));
-                    if (!customMappedApp->recentlyUsed.isEmpty()) {
+                    if (filterEmpty && !customMappedApp->recentlyUsed.isEmpty()) {
                         appList.append(customMappedApp);
                     }
                 }
@@ -33,7 +33,9 @@ namespace JetbrainsAPI {
         // Find automatically config directory, read config file and filter apps
         SettingsDirectory::findCorrespondingDirectories(SettingsDirectory::getSettingsDirectories(), automaticAppList);
         JetbrainsApplication::parseXMLFiles(automaticAppList);
-        automaticAppList = JetbrainsApplication::filterApps(automaticAppList);
+        if (filterEmpty){
+            automaticAppList = JetbrainsApplication::filterApps(automaticAppList);
+        }
         appList.append(automaticAppList);
         return appList;
     }

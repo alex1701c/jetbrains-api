@@ -176,7 +176,9 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
     if (debugMessage) {
         debugMessage->append("========== Locally Installed Jetbrains Applications ==========\n");
     }
-    for (const auto &item : localJetbrainsApplications.entryList()) {
+    auto entries = localJetbrainsApplications.entryList();
+    entries.removeOne("jetbrains-toolbox.desktop");
+    for (const auto &item: qAsConst(entries)) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(localPath + item)->
                     group("Desktop Entry").readEntry("Name")), localPath + item);
@@ -191,7 +193,9 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
     if (debugMessage) {
         debugMessage->append("========== Globally Installed Jetbrains Applications ==========\n");
     }
-    for (const auto &item : globalJetbrainsApplications.entryList()) {
+    auto globalEntries = globalJetbrainsApplications.entryList();
+    globalEntries.removeOne("jetbrains-toolbox.desktop");
+    for (const auto &item: qAsConst(globalEntries)) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(globalPath + item)->
                     group("Desktop Entry").readEntry("Name")), globalPath + item);
