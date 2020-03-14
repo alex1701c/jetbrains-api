@@ -1,7 +1,7 @@
 namespace JetbrainsAPI {
     /**
      * Get all applications with manual configuration and file watchers
-     * @param config
+     * @param config Config group which has the custom mapping configuration
      */
     QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty = true) {
         QList<JetbrainsApplication *> appList;

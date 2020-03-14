@@ -94,7 +94,7 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
             QString recentPath = reader.attributes()
                     .value("value")
                     .toString()
-                    .replace("$USER_HOME$", QDir::homePath());
+                    .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
             if (QDir(recentPath).exists()) {
                 this->recentlyUsed.append(recentPath);
             }
@@ -116,7 +116,7 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
 
 void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
     for (auto &app: qAsConst(apps)) {
-        app->parseXMLFile("", debugMessage);
+        app->parseXMLFile(QString(), debugMessage);
     }
 }
 
@@ -130,6 +130,7 @@ QList<JetbrainsApplication *> JetbrainsApplication::filterApps(QList<JetbrainsAp
             notEmpty.append(app);
         } else if (debugMessage) {
             debugMessage->append("Found not projects for: " + app->name + "\n");
+            delete app;
         }
     }
     return notEmpty;
@@ -160,7 +161,9 @@ QStringList JetbrainsApplication::getAdditionalDesktopFileLocations() {
     };
     QStringList validFiles;
     for (const auto &additionalFile: additionalDesktopFileLocations) {
-        if (QFile::exists(additionalFile)) validFiles.append(additionalFile);
+        if (QFile::exists(additionalFile)) {
+            validFiles.append(additionalFile);
+        }
     }
 
     return validFiles;
@@ -238,7 +241,12 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
 }
 
 QString JetbrainsApplication::filterApplicationName(const QString &name) {
-    return QString(name).remove(" Release").remove(" Edition").remove(" + JBR11").remove(" RC").remove(" EAP");
+    return QString(name)
+        .remove(QLatin1String(" Release"))
+        .remove(QLatin1String(" Edition"))
+        .remove(QLatin1String(" + JBR11"))
+        .remove(QLatin1String(" RC"))
+        .remove(QLatin1String(" EAP"));
 }
 
 QString JetbrainsApplication::formatOptionText(const QString &formatText, const QString &dir) {
