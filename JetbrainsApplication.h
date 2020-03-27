@@ -23,7 +23,7 @@ public:
 
     static QString filterApplicationName(const QString &name);
 
-    QString formatOptionText(const QString &formatText, const QString &dir);
+    QString formatOptionText(const QString &formatText, const QString &dir, const QString &path);
 
 
     QList<QString> recentlyUsed;

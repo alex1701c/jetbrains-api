@@ -15,5 +15,6 @@ struct FormatString {
     constexpr static const auto PROJECT = "%PROJECT";
     constexpr static const auto APPNAME = "%APPNAME";
     constexpr static const auto APP = "%APP";
+    constexpr static const auto DIR = "%DIR";
 };
 #endif //JETBRAINSRUNNER_CONFIGKEYS_H

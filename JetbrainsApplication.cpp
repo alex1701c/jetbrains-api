@@ -249,8 +249,12 @@ QString JetbrainsApplication::filterApplicationName(const QString &name) {
         .remove(QLatin1String(" EAP"));
 }
 
-QString JetbrainsApplication::formatOptionText(const QString &formatText, const QString &dir) {
-    return QString(formatText).replace(FormatString::PROJECT, dir)
-            .replace(FormatString::APPNAME, this->name)
-            .replace(FormatString::APP, this->shortName);
+QString JetbrainsApplication::formatOptionText(const QString &formatText, const QString &dir, const QString &path) {
+    QString txt = QString(formatText)
+        .replace(QLatin1String(FormatString::PROJECT), dir)
+        .replace(QLatin1String(FormatString::APPNAME), this->name);
+    if (txt.contains(QLatin1String(FormatString::DIR))) {
+        txt.replace(QLatin1String(FormatString::DIR), QString(path).replace(QDir::homePath(), QLatin1String("~")));
+    }
+    return txt;
 }
