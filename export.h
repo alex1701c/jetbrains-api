@@ -1,9 +1,13 @@
+#include "JetbrainsApplication.h"
+#include "SettingsDirectory.h"
+#include "ConfigKeys.h"
+
 namespace JetbrainsAPI {
     /**
      * Get all applications with manual configuration and file watchers
      * @param config Config group which has the custom mapping configuration
      */
-    QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty = true) {
+    QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty = true, bool fileWatchers = true) {
         QList<JetbrainsApplication *> appList;
         QList<JetbrainsApplication *> automaticAppList;
         const auto mappingMap = config.group(Config::customMappingGroup).entryMap();
@@ -14,19 +18,19 @@ namespace JetbrainsAPI {
         for (const auto &p:desktopPaths.toStdMap()) {
             // Desktop file is manually specified
             if (mappingMap.contains(p.second)) {
-                auto customMappedApp = new JetbrainsApplication(p.second);
+                auto customMappedApp = new JetbrainsApplication(p.second, fileWatchers);
                 QFile xmlConfigFile(mappingMap.value(p.second));
                 if (xmlConfigFile.open(QFile::ReadOnly)) {
                     customMappedApp->parseXMLFile(xmlConfigFile.readAll());
                     // Add path for filewatcher
                     customMappedApp->addPath(mappingMap.value(p.second));
-                    if (filterEmpty && !customMappedApp->recentlyUsed.isEmpty()) {
+                    if (!filterEmpty || !customMappedApp->recentlyUsed.isEmpty()) {
                         appList.append(customMappedApp);
                     }
                 }
                 xmlConfigFile.close();
             } else {
-                automaticAppList.append(new JetbrainsApplication(p.second));
+                automaticAppList.append(new JetbrainsApplication(p.second, fileWatchers));
             }
         }
 

@@ -7,25 +7,20 @@
 class JetbrainsApplication : public QFileSystemWatcher {
 Q_OBJECT
 public:
-
-    explicit JetbrainsApplication(const QString &desktopFilePath);
+    explicit JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher = true);
 
     static QMap<QString, QString>
     getInstalledApplicationPaths(const KConfigGroup &customMappingConfig, QString *debugMessage = nullptr);
 
     static void parseXMLFiles(QList<JetbrainsApplication *> &apps, QString *debugMessage = nullptr);
-
     void parseXMLFile(QString fileContent = "", QString *debugMessage = nullptr);
 
     static QList<JetbrainsApplication *> filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage = nullptr);
-
     static QStringList getAdditionalDesktopFileLocations();
-
     static QString filterApplicationName(const QString &name);
-
     QString formatOptionText(const QString &formatText, const QString &dir, const QString &path);
 
-
+    const bool fileWatcher;
     QList<QString> recentlyUsed;
     QString desktopFilePath;
     QString executablePath;

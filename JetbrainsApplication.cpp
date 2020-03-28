@@ -4,8 +4,8 @@
 #include <KConfigCore/KConfigGroup>
 #include <QtGui/QtGui>
 
-JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath) :
-        QFileSystemWatcher(nullptr), desktopFilePath(desktopFilePath) {
+JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher) :
+        QFileSystemWatcher(nullptr), fileWatcher(fileWatcher),desktopFilePath(desktopFilePath) {
     KConfigGroup config = KSharedConfig::openConfig(desktopFilePath)->group("Desktop Entry");
     iconPath = config.readEntry("Icon");
     executablePath = config.readEntry("Exec").remove("%u").remove("%f");
@@ -31,9 +31,10 @@ JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath) :
         if (nameList.count() == 2) {
             nameArray[1] = nameList.at(1);
         }
-
     }
-    connect(this, &QFileSystemWatcher::fileChanged, this, &JetbrainsApplication::configChanged);
+    if (fileWatcher) {
+        connect(this, &QFileSystemWatcher::fileChanged, this, &JetbrainsApplication::configChanged);
+    }
 }
 
 
@@ -52,7 +53,9 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
                 }
                 return;
             }
-            this->addPath(f2.fileName());
+            if (fileWatcher) {
+                this->addPath(f2.fileName());
+            }
             if (debugMessage) {
                 debugMessage->append("Config file found for " + this->name + " " + f2.fileName() + "\n");
             }
@@ -62,7 +65,9 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
             if (f.open(QIODevice::ReadOnly)) {
                 content = f.readAll();
                 f.close();
-                this->addPath(f.fileName());
+                if (fileWatcher) {
+                    this->addPath(f.fileName());
+                }
                 if (debugMessage) {
                     debugMessage->append("Config file found for " + this->name + " " + f.fileName() + "\n");
                 }
@@ -80,7 +85,8 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
     // Go through elements until the recentPaths option element is selected
     for (int i = 0; i < 4; ++i) {
         reader.readNextStartElement();
-        if (reader.name() != "option" || reader.attributes().value("name") != "recentPaths") {
+        if (reader.name() != QLatin1String("option")
+        || reader.attributes().value(QLatin1String("name")) != QLatin1String("recentPaths")) {
             reader.skipCurrentElement();
         } else {
             reader.name();
@@ -90,9 +96,9 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
 
     // Extract paths from XML element
     while (reader.readNextStartElement()) {
-        if (reader.name() == "option") {
+        if (reader.name() == QLatin1String("option")) {
             QString recentPath = reader.attributes()
-                    .value("value")
+                    .value(QLatin1String("value"))
                     .toString()
                     .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
             if (QDir(recentPath).exists()) {
