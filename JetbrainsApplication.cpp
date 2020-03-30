@@ -258,7 +258,8 @@ QString JetbrainsApplication::filterApplicationName(const QString &name) {
 QString JetbrainsApplication::formatOptionText(const QString &formatText, const QString &dir, const QString &path) {
     QString txt = QString(formatText)
         .replace(QLatin1String(FormatString::PROJECT), dir)
-        .replace(QLatin1String(FormatString::APPNAME), this->name);
+        .replace(QLatin1String(FormatString::APPNAME), this->name)
+        .replace(QLatin1String(FormatString::APP), this->shortName);
     if (txt.contains(QLatin1String(FormatString::DIR))) {
         txt.replace(QLatin1String(FormatString::DIR), QString(path).replace(QDir::homePath(), QLatin1String("~")));
     }
