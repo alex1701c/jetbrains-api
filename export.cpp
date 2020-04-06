@@ -37,4 +37,17 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
     appList.append(automaticAppList);
     return appList;
 }
+
+QList<JetbrainsApplication *> fetchRawApplications(const KConfigGroup &config){
+    QList<JetbrainsApplication *> appList;
+    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(
+        config.group(Config::customMappingGroup));
+
+    for (const auto &p:desktopPaths.toStdMap()) {
+        appList.append(new JetbrainsApplication(p.second, false));
+    }
+
+    return appList;
+}
+
 }
