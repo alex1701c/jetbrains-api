@@ -13,8 +13,21 @@ namespace JetbrainsAPI {
     QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty = true, bool fileWatchers = true);
 
     /**
+     * Get the installed applications but don't use the manual mapping which can be configured in the
+     * KRunner settings module https://github.com/alex1701c/JetBrainsRunner
+     * @param filterEmpty remove apps that have no recent projects from the list
+     * @param fileWatchers use file watchers to reparse the recent projects when they change
+     */
+    QList<JetbrainsApplication *> fetchApplications(bool filterEmpty = true, bool fileWatchers = true);
+
+    /**
      * Get the JetbrainsApplications without reading the recent projects
      * @param config Config group which has the custom mapping configuration
      */
     QList<JetbrainsApplication *> fetchRawApplications(const KConfigGroup &config);
+
+    /**
+     * Overload for fetchRawApplications(const KConfigGroup &config)
+     */
+    QList<JetbrainsApplication *> fetchRawApplications();
 }

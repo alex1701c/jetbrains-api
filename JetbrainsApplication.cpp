@@ -232,6 +232,9 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
     if (debugMessage) {
         debugMessage->append("========== Manually Configured Jetbrains Applications ==========\n");
     }
+    if (!customMappingConfig.isValid()) {
+        return applicationPaths;
+    }
     for (const auto &mappingEntry: customMappingConfig.entryMap().toStdMap()) {
         if (QFile::exists(mappingEntry.first) && QFile::exists(mappingEntry.second)) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(mappingEntry.first)->
@@ -264,4 +267,16 @@ QString JetbrainsApplication::formatOptionText(const QString &formatText, const 
         txt.replace(QLatin1String(FormatString::DIR), QString(path).replace(QDir::homePath(), QLatin1String("~")));
     }
     return txt;
+}
+
+QDebug operator<<(QDebug d, const JetbrainsApplication *app)
+{
+    return d
+        << " name: " << app->name
+        << " desktopFilePath: " << app->desktopFilePath
+        << " executablePath: " << app->executablePath
+        << " configFolder: " << app->configFolder
+        << " iconPath: " << app->iconPath
+        << " shortName: " << app->shortName
+        << " recentlyUsed: " << app->recentlyUsed;
 }

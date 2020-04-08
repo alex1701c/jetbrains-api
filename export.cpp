@@ -38,16 +38,40 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
     return appList;
 }
 
+QList<JetbrainsApplication *> fetchApplications(bool filterEmpty, bool fileWatchers) {
+    QList<JetbrainsApplication *> appList;
+    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(KConfigGroup());
+
+    // Split manually configured and automatically found apps
+    for (const auto &p:desktopPaths.toStdMap()) {
+        appList.append(new JetbrainsApplication(p.second, fileWatchers));
+    }
+
+    SettingsDirectory::findCorrespondingDirectories(SettingsDirectory::getSettingsDirectories(), appList);
+    JetbrainsApplication::parseXMLFiles(appList);
+    if (filterEmpty){
+        return JetbrainsApplication::filterApps(appList);
+    }
+    return appList;
+}
+
 QList<JetbrainsApplication *> fetchRawApplications(const KConfigGroup &config){
     QList<JetbrainsApplication *> appList;
-    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(
-        config.group(Config::customMappingGroup));
+    KConfigGroup grp;
+    if (config.isValid()) {
+         grp = config.group(Config::customMappingGroup);
+    }
+    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(grp);
 
     for (const auto &p:desktopPaths.toStdMap()) {
         appList.append(new JetbrainsApplication(p.second, false));
     }
 
     return appList;
+}
+
+QList<JetbrainsApplication *> fetchRawApplications(){
+    return fetchRawApplications(KConfigGroup());
 }
 
 }

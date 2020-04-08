@@ -59,6 +59,13 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
 }
 
 
+void SettingsDirectory::findCorrespondingDirectories(const QList<SettingsDirectory> &dirs,
+                                                     QList<JetbrainsApplication *> &apps) {
+    for (auto &app: qAsConst(apps)) {
+        findCorrespondingDirectory(dirs, app);
+    }
+}
+
 QMap<QString, QString> SettingsDirectory::getAliases() {
     return {
             {"IntelliJ IDEA Community", "IdeaIC"},
@@ -66,11 +73,4 @@ QMap<QString, QString> SettingsDirectory::getAliases() {
             {"PyCharm Professional",    "PyCharm"},
             {"PyCharm Community",       "PyCharmCE"}
     };
-}
-
-void SettingsDirectory::findCorrespondingDirectories(const QList<SettingsDirectory> &dirs,
-                                                     QList<JetbrainsApplication *> &apps) {
-    for (auto &app: qAsConst(apps)) {
-        findCorrespondingDirectory(dirs, app);
-    }
 }
