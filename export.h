@@ -8,7 +8,7 @@ namespace JetbrainsAPI {
      * Get all applications with manual configuration and file watchers
      * @param config Config group which has the custom mapping configuration
      * By using the config module from the KRunner plugin the config group gets created using:
-     * @code KSharedConfig::openConfig(QDir::homePath() + "/.config/krunnerplugins/jetbrainsrunnerrc")->group("Config");
+     * @code KSharedConfig::openConfig(QStringLiteral("krunnerplugins/jetbrainsrunnerrc"))->group("Config");
      */
     QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty = true, bool fileWatchers = true);
 

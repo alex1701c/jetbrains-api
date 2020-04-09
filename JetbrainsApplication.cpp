@@ -5,27 +5,27 @@
 #include <QtGui/QtGui>
 
 JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher) :
-        QFileSystemWatcher(nullptr), fileWatcher(fileWatcher),desktopFilePath(desktopFilePath) {
+        QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
     KConfigGroup config = KSharedConfig::openConfig(desktopFilePath)->group("Desktop Entry");
     iconPath = config.readEntry("Icon");
     executablePath = config.readEntry("Exec").remove("%u").remove("%f");
     name = config.readEntry("Name");
     shortName = QString(name)
-            .remove(" Edition")
-            .remove(" Professional")
-            .remove(" Ultimate")
-            .remove(" + JBR11")
-            .remove(" RC")
-            .remove(" EAP")
-            .replace("Community", "CE");
+            .remove(QLatin1String(" Edition"))
+            .remove(QLatin1String(" Professional"))
+            .remove(QLatin1String(" Ultimate"))
+            .remove(QLatin1String(" + JBR11"))
+            .remove(QLatin1String(" RC"))
+            .remove(QLatin1String(" EAP"))
+            .replace(QLatin1String("Community"), QLatin1String("CE"));
 
     // Allow the user to search for both names like Android Studio
     auto nameList = filterApplicationName(QString(name))
-            .remove(" Professional")
-            .remove(" Community")
-            .remove(" Ultimate")
-            .remove(" Edu")
-            .split(" ");
+            .remove(QLatin1String(" Professional"))
+            .remove(QLatin1String(" Community"))
+            .remove(QLatin1String(" Ultimate"))
+            .remove(QLatin1String(" Edu"))
+            .split(' ');
     if (nameList.count() > 0) {
         nameArray[0] = nameList.at(0);
         if (nameList.count() == 2) {
