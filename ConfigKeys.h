@@ -10,6 +10,7 @@ struct Config {
     constexpr static const auto displayInCategories = "DisplayInCategories";
     constexpr static const auto customMappingGroup = "CustomMapping";
     constexpr static const auto checkedUpdateDate = "checkedUpdateDate";
+    constexpr static const auto filterSearchResults = "filterSearchResults ";
 };
 struct FormatString {
     constexpr static const auto PROJECT = "%PROJECT";
