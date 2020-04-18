@@ -10,6 +10,12 @@ public:
     SettingsDirectory(QString directory, QString name);
 
     /**
+     * returns absolute paths of all settings directories that can be found,
+     * order of versions is ascending
+     */
+    static QStringList getAllSettingsDirectories();
+
+    /**
      * Get the folders in the home directory that match the pattern o the Jetbrains IDE folder names
      * @param debugMessage optional QString pointer which can be used to debug the parsing process
      */

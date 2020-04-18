@@ -9,17 +9,8 @@ SettingsDirectory::SettingsDirectory(QString directory, QString name) : director
 
 QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debugMessage) {
     const QString home = QDir::homePath();
+    QStringList entries = getAllSettingsDirectories();
     QList<SettingsDirectory> dirs;
-    QRegularExpression configFolder(R"(^\.[A-Z][a-zA-Z]+(\d+\.\d+)$)");
-    QStringList entries;
-    for (const auto &e: QDir(home).entryList(QDir::Hidden | QDir::Dirs).filter(configFolder)) {
-        entries.append(home + '/' + e);
-    }
-
-    for (const auto &entry: QDir(home + "/.config/JetBrains").entryList(QDir::NoDotAndDotDot | QDir::Dirs)) {
-        // TODO Fix handling of multiple versions
-        entries.append(home + "/.config/JetBrains/" + entry);
-    }
 
     // Iterate reversed over entries
     QRegularExpression configFolderName(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
@@ -27,8 +18,10 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
     for (int i = maxIndex; i <= maxIndex && i >= 0; i--) {
         auto const &e = entries.at(i);
         // Contains name and version number live testing => https://regex101.com/r/pMOkox/1
-        const auto regexMatch = configFolderName.match(e.split('/').last());
-        dirs.append(SettingsDirectory(e, regexMatch.captured(1)));
+        const auto regexMatch = configFolderName.match(QDir(e).dirName());
+        if (regexMatch.hasMatch() && regexMatch.lastCapturedIndex()) {
+            dirs.append(SettingsDirectory(e, regexMatch.captured(1)));
+        }
 
     }
     if (debugMessage) {
@@ -48,7 +41,7 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
             app->configFolder = getExistingConfigDir(dir.directory);
             return;
         }
-        if (dir.name == QString(app->name).remove(" ")) {
+        if (dir.name == QString(app->name).remove(' ')) {
             app->configFolder = getExistingConfigDir(dir.directory);
             return;
         }
@@ -56,7 +49,9 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
 
     // Handle Ultimate/Community editions and experimental java runtime
     QMap<QString, QString> aliases = getAliases();
-    if (aliases.count(app->name) == 0) return;
+    if (!aliases.contains(app->name)) {
+        return;
+    }
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == aliases.find(app->name).value()) {
             app->configFolder = getExistingConfigDir(dir.directory);
@@ -83,11 +78,28 @@ QMap<QString, QString> SettingsDirectory::getAliases() {
 }
 
 QString SettingsDirectory::getExistingConfigDir(const QString &dir) {
+    // "/" at end is required for concatenation of filenames
     const QString path = dir + "/config/options/";
     QDir oldDir(path);
     if (oldDir.exists()) {
         return path;
     }
     return dir + "/options/";
+}
+
+QStringList SettingsDirectory::getAllSettingsDirectories() {
+    const QString home = QDir::homePath();
+    const QRegularExpression configFolder(R"(^\.[A-Z][a-zA-Z]+(\d+\.\d+)$)");
+    QStringList entries;
+    const auto oldConfigLocations = QDir(home).entryList(QDir::Hidden | QDir::Dirs).filter(configFolder);
+    for (const auto &e: oldConfigLocations) {
+        entries.append(home + '/' + e);
+    }
+
+    const auto newConfigLocations = QDir(home + "/.config/JetBrains").entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (const auto &entry: newConfigLocations) {
+        entries.append(home + "/.config/JetBrains/" + entry);
+    }
+    return entries;
 }
 
