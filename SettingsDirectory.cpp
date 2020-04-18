@@ -10,19 +10,26 @@ SettingsDirectory::SettingsDirectory(QString directory, QString name) : director
 QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debugMessage) {
     const QString home = QDir::homePath();
     QList<SettingsDirectory> dirs;
-    const QStringList entries = QDir(home).entryList(QDir::Hidden | QDir::Dirs);
+    QRegularExpression configFolder(R"(^\.[A-Z][a-zA-Z]+(\d+\.\d+)$)");
+    QStringList entries;
+    for (const auto &e: QDir(home).entryList(QDir::Hidden | QDir::Dirs).filter(configFolder)) {
+        entries.append(home + '/' + e);
+    }
+
+    for (const auto &entry: QDir(home + "/.config/JetBrains").entryList(QDir::NoDotAndDotDot | QDir::Dirs)) {
+        // TODO Fix handling of multiple versions
+        entries.append(home + "/.config/JetBrains/" + entry);
+    }
 
     // Iterate reversed over entries
+    QRegularExpression configFolderName(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
     const int maxIndex = entries.size() - 1;
-    QRegularExpression configFolder(R"(^\.[A-Z][a-zA-Z]+(\d+\.\d+)$)");
-    QRegularExpression configFolderName(R"(^\.([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
     for (int i = maxIndex; i <= maxIndex && i >= 0; i--) {
         auto const &e = entries.at(i);
         // Contains name and version number live testing => https://regex101.com/r/pMOkox/1
-        if (e.contains(configFolder)) {
-            const auto regexMatch = configFolderName.match(e);
-            dirs.append(SettingsDirectory(home + "/" + e, regexMatch.captured(1)));
-        }
+        const auto regexMatch = configFolderName.match(e.split('/').last());
+        dirs.append(SettingsDirectory(e, regexMatch.captured(1)));
+
     }
     if (debugMessage) {
         debugMessage->append("========== Find Available Config Folders ==========\n");
@@ -38,11 +45,11 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
     // Exact match or space in name
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == app->name) {
-            app->configFolder = dir.directory + "/config/options/";
+            app->configFolder = getExistingConfigDir(dir.directory);
             return;
         }
         if (dir.name == QString(app->name).remove(" ")) {
-            app->configFolder = dir.directory + "/config/options/";
+            app->configFolder = getExistingConfigDir(dir.directory);
             return;
         }
     }
@@ -52,7 +59,7 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
     if (aliases.count(app->name) == 0) return;
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == aliases.find(app->name).value()) {
-            app->configFolder = dir.directory + "/config/options/";
+            app->configFolder = getExistingConfigDir(dir.directory);
             return;
         }
     }
@@ -74,3 +81,13 @@ QMap<QString, QString> SettingsDirectory::getAliases() {
             {"PyCharm Community",       "PyCharmCE"}
     };
 }
+
+QString SettingsDirectory::getExistingConfigDir(const QString &dir) {
+    const QString path = dir + "/config/options/";
+    QDir oldDir(path);
+    if (oldDir.exists()) {
+        return path;
+    }
+    return dir + "/options/";
+}
+

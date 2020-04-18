@@ -34,6 +34,7 @@ public:
      */
     static QMap<QString, QString> getAliases();
 
+    inline static QString getExistingConfigDir(const QString &dir);
 
     QString directory;
     QString name;
