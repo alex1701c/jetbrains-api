@@ -2,6 +2,7 @@
 #include <QtCore>
 #include "SettingsDirectory.h"
 #include "JetbrainsApplication.h"
+#include "macros.h"
 
 
 SettingsDirectory::SettingsDirectory(QString directory, QString name) : directory(std::move(
@@ -24,12 +25,12 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
         }
 
     }
-    if (debugMessage) {
-        debugMessage->append("========== Find Available Config Folders ==========\n");
-        for (const auto &d: qAsConst(dirs)) {
-            debugMessage->append(d.name + " " + d.directory + "\n");
-        }
+    JBR_FILE_LOG_APPEND("========== Find Available Config Folders ==========\n");
+#ifndef NO_JBR_FILE_LOG
+    for (const auto &d: qAsConst(dirs)) {
+        JBR_FILE_LOG_APPEND(d.name + " " + d.directory + "\n");
     }
+#endif
     return dirs;
 }
 

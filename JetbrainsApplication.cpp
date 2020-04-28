@@ -3,6 +3,7 @@
 #include <KSharedConfig>
 #include <KConfigCore/KConfigGroup>
 #include <QtGui/QtGui>
+#include "macros.h"
 
 JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher) :
         QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
@@ -48,17 +49,13 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
             QFile f2(this->configFolder + "recentProjects.xml");
             if (!f2.open(QIODevice::ReadOnly)) {
                 f2.close();
-                if (debugMessage) {
-                    debugMessage->append("No config file found for " + this->name + " " + this->desktopFilePath + "\n");
-                }
+                JBR_FILE_LOG_APPEND("No config file found for " + this->name + " " + this->desktopFilePath + "\n")
                 return;
             }
             if (fileWatcher) {
                 this->addPath(f2.fileName());
             }
-            if (debugMessage) {
-                debugMessage->append("Config file found for " + this->name + " " + f2.fileName() + "\n");
-            }
+            JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + f2.fileName() + "\n")
             content = f2.readAll();
             f2.close();
         } else {
@@ -68,9 +65,7 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
                 if (fileWatcher) {
                     this->addPath(f.fileName());
                 }
-                if (debugMessage) {
-                    debugMessage->append("Config file found for " + this->name + " " + f.fileName() + "\n");
-                }
+                JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + f.fileName() + "\n")
             }
         }
     }
@@ -107,17 +102,17 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
             reader.readElementText();
         }
     }
-    if (debugMessage) {
-        debugMessage->append("=====Recently used project folder for " + this->name + "=====\n");
-        if (!recentlyUsed.isEmpty()) {
-            for (const auto &recent: qAsConst(recentlyUsed)) {
-                debugMessage->append("    " + recent + "\n");
-            }
-        } else {
-            debugMessage->append("    NO PROJECTS\n");
+#ifndef NO_JBR_FILE_LOG
+    JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====\n")
+    if (!recentlyUsed.isEmpty()) {
+        for (const auto &recent: qAsConst(recentlyUsed)) {
+            JBR_FILE_LOG_APPEND("    " + recent + "\n")
         }
-        debugMessage->append("\n");
+    } else {
+        JBR_FILE_LOG_APPEND("    NO PROJECTS\n")
     }
+    JBR_FILE_LOG_APPEND("\n")
+#endif
 }
 
 void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
@@ -128,14 +123,12 @@ void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QS
 
 QList<JetbrainsApplication *> JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
     QList<JetbrainsApplication *> notEmpty;
-    if (debugMessage) {
-        debugMessage->append("========== Filter Jetbrains Apps ==========\n");
-    }
+    JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps ==========\n")
     for (auto const &app: qAsConst(apps)) {
         if (!app->recentlyUsed.empty()) {
             notEmpty.append(app);
-        } else if (debugMessage) {
-            debugMessage->append("Found not projects for: " + app->name + "\n");
+        } else {
+            JBR_FILE_LOG_APPEND("Found not projects for: " + app->name + "\n")
             delete app;
         }
     }
@@ -182,56 +175,42 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
     // Manually, locally or with Toolbox installed
     const QString localPath = QDir::homePath() + "/.local/share/applications/";
     const QDir localJetbrainsApplications(localPath, {"jetbrains-*"});
-    if (debugMessage) {
-        debugMessage->append("========== Locally Installed Jetbrains Applications ==========\n");
-    }
+    JBR_FILE_LOG_APPEND("========== Locally Installed Jetbrains Applications ==========\n")
     auto entries = localJetbrainsApplications.entryList();
     entries.removeOne("jetbrains-toolbox.desktop");
     for (const auto &item: qAsConst(entries)) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(localPath + item)->
                     group("Desktop Entry").readEntry("Name")), localPath + item);
-            if (debugMessage) {
-                debugMessage->append(localPath + item + "\n");
-            }
+            JBR_FILE_LOG_APPEND(localPath + item + "\n")
         }
     }
     // Globally installed
     const QString globalPath = "/usr/share/applications/";
     const QDir globalJetbrainsApplications(globalPath, {"jetbrains-*"});
-    if (debugMessage) {
-        debugMessage->append("========== Globally Installed Jetbrains Applications ==========\n");
-    }
+    JBR_FILE_LOG_APPEND("========== Globally Installed Jetbrains Applications ==========\n")
     auto globalEntries = globalJetbrainsApplications.entryList();
     globalEntries.removeOne("jetbrains-toolbox.desktop");
     for (const auto &item: qAsConst(globalEntries)) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(globalPath + item)->
                     group("Desktop Entry").readEntry("Name")), globalPath + item);
-            if (debugMessage) {
-                debugMessage->append(globalPath + item + "\n");
-            }
+            JBR_FILE_LOG_APPEND(globalPath + item + "\n")
         }
     }
 
     // AUR/Snap/Other  installed
-    if (debugMessage) {
-        debugMessage->append("========== AUR/Snap/Other Installed Jetbrains Applications ==========\n");
-    }
+    JBR_FILE_LOG_APPEND("========== AUR/Snap/Other Installed Jetbrains Applications ==========\n")
     for (const auto &item : getAdditionalDesktopFileLocations()) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(item)->
                     group("Desktop Entry").readEntry("Name")), item);
-            if (debugMessage) {
-                debugMessage->append(item + "\n");
-            }
+            JBR_FILE_LOG_APPEND(item + "\n")
         }
     }
 
     // Add manually configured entries
-    if (debugMessage) {
-        debugMessage->append("========== Manually Configured Jetbrains Applications ==========\n");
-    }
+    JBR_FILE_LOG_APPEND("========== Manually Configured Jetbrains Applications ==========\n")
     if (!customMappingConfig.isValid()) {
         return applicationPaths;
     }
@@ -239,13 +218,10 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
         if (QFile::exists(mappingEntry.first) && QFile::exists(mappingEntry.second)) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(mappingEntry.first)->
                     group("Desktop Entry").readEntry("Name")), mappingEntry.first);
-            if (debugMessage) {
-                debugMessage->append(mappingEntry.first + "\n");
-                debugMessage->append(mappingEntry.second + "\n");
-            }
+            JBR_FILE_LOG_APPEND(mappingEntry.first + "\n")
+            JBR_FILE_LOG_APPEND(mappingEntry.second + "\n")
         }
     }
-
     return applicationPaths;
 }
 
