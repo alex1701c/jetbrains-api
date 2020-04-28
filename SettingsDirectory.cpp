@@ -40,10 +40,12 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == app->name) {
             app->configFolder = getExistingConfigDir(dir.directory);
+            JBR_DEBUG(app->name + ' ' + app->configFolder)
             return;
         }
         if (dir.name == QString(app->name).remove(' ')) {
             app->configFolder = getExistingConfigDir(dir.directory);
+            JBR_DEBUG(app->name + ' ' + app->configFolder)
             return;
         }
     }
@@ -51,11 +53,13 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
     // Handle Ultimate/Community editions and experimental java runtime
     QMap<QString, QString> aliases = getAliases();
     if (!aliases.contains(app->name)) {
+        JBR_DEBUG(app->name + " is not contained in alias")
         return;
     }
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == aliases.find(app->name).value()) {
             app->configFolder = getExistingConfigDir(dir.directory);
+            JBR_DEBUG(app->name + ' ' + app->configFolder + ' '+  " from alias")
             return;
         }
     }
@@ -101,6 +105,8 @@ QStringList SettingsDirectory::getAllSettingsDirectories() {
     for (const auto &entry: newConfigLocations) {
         entries.append(home + "/.config/JetBrains/" + entry);
     }
+    JBR_DEBUG("All settings directories:")
+    JBR_DEBUG(entries)
     return entries;
 }
 

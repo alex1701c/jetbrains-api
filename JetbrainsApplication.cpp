@@ -70,7 +70,10 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
         }
     }
 
-    if (content.isEmpty()) return;
+    if (content.isEmpty()) {
+        JBR_DEBUG(name + " file content is empty")
+        return;
+    }
 
     // Go to RecentDirectoryProjectsManager component
     QXmlStreamReader reader(content);
@@ -98,11 +101,13 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
                     .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
             if (QDir(recentPath).exists()) {
                 this->recentlyUsed.append(recentPath);
+            } else {
+                JBR_DEBUG(name + " the project path does not exist " + recentPath)
             }
             reader.readElementText();
         }
     }
-#ifndef NO_JBR_FILE_LOG
+#ifndef NO_JBR_FILE_LOG // Extra if statement to avoid unused warnings
     JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====\n")
     if (!recentlyUsed.isEmpty()) {
         for (const auto &recent: qAsConst(recentlyUsed)) {
@@ -222,6 +227,8 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
             JBR_FILE_LOG_APPEND(mappingEntry.second + "\n")
         }
     }
+    JBR_DEBUG("Application path map:")
+    JBR_DEBUG(applicationPaths)
     return applicationPaths;
 }
 

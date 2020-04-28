@@ -22,7 +22,6 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
                     appList.append(customMappedApp);
                 }
             }
-            xmlConfigFile.close();
         } else {
             automaticAppList.append(new JetbrainsApplication(p.second, fileWatchers));
         }
