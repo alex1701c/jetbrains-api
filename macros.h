@@ -8,7 +8,7 @@
 #endif
 
 #if JBR_DEBUG_INFO
-#define JBR_DEBUG(code) qDebug() << code;
+#define JBR_DEBUG(code) qWarning() << code;
 #else
 #define JBR_DEBUG(code)
 #endif
