@@ -71,7 +71,7 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
     }
 
     if (content.isEmpty()) {
-        JBR_DEBUG(name + " file content is empty")
+        JBR_FILE_LOG_APPEND(name + " file content is empty \n")
         return;
     }
 
@@ -102,22 +102,21 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
             if (QDir(recentPath).exists()) {
                 this->recentlyUsed.append(recentPath);
             } else {
-                JBR_DEBUG(name + " the project path does not exist " + recentPath)
+                JBR_FILE_LOG_APPEND(name + " the project path does not exist " + recentPath + '\n')
             }
             reader.readElementText();
         }
     }
-#ifndef NO_JBR_FILE_LOG // Extra if statement to avoid unused warnings
     JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====\n")
     if (!recentlyUsed.isEmpty()) {
         for (const auto &recent: qAsConst(recentlyUsed)) {
+            Q_UNUSED(recent)
             JBR_FILE_LOG_APPEND("    " + recent + "\n")
         }
     } else {
         JBR_FILE_LOG_APPEND("    NO PROJECTS\n")
     }
     JBR_FILE_LOG_APPEND("\n")
-#endif
 }
 
 void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
@@ -227,8 +226,11 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
             JBR_FILE_LOG_APPEND(mappingEntry.second + "\n")
         }
     }
-    JBR_DEBUG("Application path map:")
-    JBR_DEBUG(applicationPaths)
+    JBR_FILE_LOG_APPEND("Application path map: \n")
+    for (const auto &path : applicationPaths.toStdMap()) {
+        Q_UNUSED(path)
+        JBR_FILE_LOG_APPEND(path.first + " ==> " +path.second + "\n")
+    }
     return applicationPaths;
 }
 
