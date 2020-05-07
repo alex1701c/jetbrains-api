@@ -100,7 +100,18 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
                     .toString()
                     .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
             if (QDir(recentPath).exists()) {
-                this->recentlyUsed.append(recentPath);
+                Project project;
+                project.path = recentPath;
+                QFile nameFile(recentPath + QStringLiteral("/.idea/.name"));
+                if (nameFile.exists()) {
+                    if (nameFile.open(QFile::ReadOnly)) {
+                        project.name = nameFile.readAll();
+                    }
+                }
+                if (project.name.isEmpty()) {
+                    project.name = recentPath.split('/').last();
+                }
+                this->recentlyUsed.append(project);
             } else {
                 JBR_FILE_LOG_APPEND(name + " the project path does not exist " + recentPath + '\n')
             }
@@ -111,7 +122,7 @@ void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) 
     if (!recentlyUsed.isEmpty()) {
         for (const auto &recent: qAsConst(recentlyUsed)) {
             Q_UNUSED(recent)
-            JBR_FILE_LOG_APPEND("    " + recent + "\n")
+            JBR_FILE_LOG_APPEND("    " + recent.path + "\n")
         }
     } else {
         JBR_FILE_LOG_APPEND("    NO PROJECTS\n")
@@ -243,25 +254,28 @@ QString JetbrainsApplication::filterApplicationName(const QString &name) {
         .remove(QLatin1String(" EAP"));
 }
 
-QString JetbrainsApplication::formatOptionText(const QString &formatText, const QString &dir, const QString &path) {
+QString JetbrainsApplication::formatOptionText(const QString &formatText, const Project &project) {
     QString txt = QString(formatText)
-        .replace(QLatin1String(FormatString::PROJECT), dir)
+        .replace(QLatin1String(FormatString::PROJECT), project.name)
         .replace(QLatin1String(FormatString::APPNAME), this->name)
         .replace(QLatin1String(FormatString::APP), this->shortName);
     if (txt.contains(QLatin1String(FormatString::DIR))) {
-        txt.replace(QLatin1String(FormatString::DIR), QString(path).replace(QDir::homePath(), QLatin1String("~")));
+        txt.replace(QLatin1String(FormatString::DIR), QString(project.path).replace(QDir::homePath(), QLatin1String("~")));
     }
     return txt;
 }
 
 QDebug operator<<(QDebug d, const JetbrainsApplication *app)
 {
-    return d
-        << " name: " << app->name
+    d   << " name: " << app->name
         << " desktopFilePath: " << app->desktopFilePath
         << " executablePath: " << app->executablePath
         << " configFolder: " << app->configFolder
         << " iconPath: " << app->iconPath
         << " shortName: " << app->shortName
-        << " recentlyUsed: " << app->recentlyUsed;
+        << " recentlyUsed: ";
+    for (const auto &project : qAsConst(app->recentlyUsed)) {
+        d << project.name << project.path;
+    }
+    return d;
 }

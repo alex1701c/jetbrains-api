@@ -1,4 +1,4 @@
-set(jetbrains_api_SRCS JetbrainsApplication.cpp SettingsDirectory.cpp export.cpp)
+set(jetbrains_api_SRCS JetbrainsApplication.cpp SettingsDirectory.cpp Project.cpp export.cpp)
 
 add_library(jetbrains_api_static STATIC ${jetbrains_api_SRCS})
 

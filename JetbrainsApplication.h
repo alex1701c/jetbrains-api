@@ -2,6 +2,7 @@
 #define JETBRAINSAPPLICATION_H
 
 #include <QDebug>
+#include "Project.h"
 #include <QFileSystemWatcher>
 #include <QFile>
 #include <KConfigCore/KConfigGroup>
@@ -61,10 +62,10 @@ public:
     /**
      * Replace string variables by the parameters
      */
-    QString formatOptionText(const QString &formatText, const QString &dir, const QString &path);
+    QString formatOptionText(const QString &formatText, const Project &project);
 
     const bool fileWatcher;
-    QList<QString> recentlyUsed;
+    QList<Project> recentlyUsed;
     QString desktopFilePath;
     QString executablePath;
     QString iconPath;

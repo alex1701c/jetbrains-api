@@ -1,6 +1,7 @@
 #include "JetbrainsApplication.h"
 #include "SettingsDirectory.h"
 #include "ConfigKeys.h"
+#include "Project.h"
 
 namespace JetbrainsAPI {
 
