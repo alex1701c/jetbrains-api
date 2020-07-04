@@ -27,7 +27,7 @@ JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool 
             .remove(QLatin1String(" Ultimate"))
             .remove(QLatin1String(" Edu"))
             .split(' ');
-    if (nameList.count() > 0) {
+    if (!nameList.isEmpty()) {
         nameArray[0] = nameList.at(0);
         if (nameList.count() == 2) {
             nameArray[1] = nameList.at(1);

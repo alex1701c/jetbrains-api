@@ -9,21 +9,24 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
         config.group(Config::customMappingGroup));
 
     // Split manually configured and automatically found apps
-    for (const auto &p:desktopPaths.toStdMap()) {
+    auto desktopPathsIt = desktopPaths.constBegin();
+    while (desktopPathsIt != desktopPaths.constEnd()) {
+        const QString &path = desktopPathsIt.value();
+        ++desktopPathsIt;
         // Desktop file is manually specified
-        if (mappingMap.contains(p.second)) {
-            auto customMappedApp = new JetbrainsApplication(p.second, fileWatchers);
-            QFile xmlConfigFile(mappingMap.value(p.second));
+        if (mappingMap.contains(path)) {
+            auto customMappedApp = new JetbrainsApplication(path, fileWatchers);
+            QFile xmlConfigFile(mappingMap.value(path));
             if (xmlConfigFile.open(QFile::ReadOnly)) {
                 customMappedApp->parseXMLFile(xmlConfigFile.readAll());
                 // Add path for filewatcher
-                customMappedApp->addPath(mappingMap.value(p.second));
+                customMappedApp->addPath(mappingMap.value(path));
                 if (!filterEmpty || !customMappedApp->recentlyUsed.isEmpty()) {
                     appList.append(customMappedApp);
                 }
             }
         } else {
-            automaticAppList.append(new JetbrainsApplication(p.second, fileWatchers));
+            automaticAppList.append(new JetbrainsApplication(path, fileWatchers));
         }
     }
 
@@ -42,8 +45,10 @@ QList<JetbrainsApplication *> fetchApplications(bool filterEmpty, bool fileWatch
     const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(KConfigGroup());
 
     // Split manually configured and automatically found apps
-    for (const auto &p:desktopPaths.toStdMap()) {
-        appList.append(new JetbrainsApplication(p.second, fileWatchers));
+    auto desktopPathsIt = desktopPaths.constBegin();
+    while (desktopPathsIt != desktopPaths.constEnd()) {
+        appList.append(new JetbrainsApplication(desktopPathsIt.value(), fileWatchers));
+        ++desktopPathsIt;
     }
 
     SettingsDirectory::findCorrespondingDirectories(SettingsDirectory::getSettingsDirectories(), appList);
@@ -62,8 +67,10 @@ QList<JetbrainsApplication *> fetchRawApplications(const KConfigGroup &config){
     }
     const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(grp);
 
-    for (const auto &p:desktopPaths.toStdMap()) {
-        appList.append(new JetbrainsApplication(p.second, false));
+    auto desktopPathsIt = desktopPaths.constBegin();
+    while (desktopPathsIt != desktopPaths.constEnd()) {
+        appList.append(new JetbrainsApplication(desktopPathsIt.value(), false));
+        ++desktopPathsIt;
     }
 
     return appList;

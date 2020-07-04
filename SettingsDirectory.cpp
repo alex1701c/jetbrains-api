@@ -14,7 +14,7 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
     QList<SettingsDirectory> dirs;
 
     // Iterate reversed over entries
-    QRegularExpression configFolderName(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
+    const QRegularExpression configFolderName(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
     const int maxIndex = entries.size() - 1;
     for (int i = maxIndex; i <= maxIndex && i >= 0; i--) {
         auto const &e = entries.at(i);
@@ -85,7 +85,7 @@ QMap<QString, QString> SettingsDirectory::getAliases() {
 
 QString SettingsDirectory::getExistingConfigDir(const QString &dir) {
     // "/" at end is required for concatenation of filenames
-    const QString path = dir + "/config/options/";
+    QString path = dir + "/config/options/";
     QDir oldDir(path);
     if (oldDir.exists()) {
         return path;

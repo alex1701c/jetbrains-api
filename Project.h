@@ -9,6 +9,4 @@ public:
     QString path;
 };
 
-
-
 #endif //JETBRAINSRUNNER_PROJECT_H
