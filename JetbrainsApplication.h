@@ -10,7 +10,7 @@
 class JetbrainsApplication : public QFileSystemWatcher {
 Q_OBJECT
 public:
-    explicit JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher = true);
+    explicit JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher = true, QObject *parent = nullptr);
 
     /**
      * Utility function that allows you to debug the apps using

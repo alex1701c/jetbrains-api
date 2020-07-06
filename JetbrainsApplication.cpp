@@ -5,11 +5,11 @@
 #include <QtGui/QtGui>
 #include "macros.h"
 
-JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher) :
-        QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
+JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher, QObject *parent) :
+        QFileSystemWatcher(parent), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
     KConfigGroup config = KSharedConfig::openConfig(desktopFilePath)->group("Desktop Entry");
     iconPath = config.readEntry("Icon");
-    executablePath = config.readEntry("Exec").remove("%u").remove("%f");
+    executablePath = config.readEntry("Exec").remove(QRegularExpression(QStringLiteral("%\\w")));
     name = config.readEntry("Name");
     shortName = QString(name)
             .remove(QLatin1String(" Edition"))
@@ -189,10 +189,10 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
 
     // Manually, locally or with Toolbox installed
     const QString localPath = QDir::homePath() + "/.local/share/applications/";
-    const QDir localJetbrainsApplications(localPath, {"jetbrains-*"});
+    const QDir localJetbrainsApplications(localPath, {QStringLiteral("jetbrains-*")});
     JBR_FILE_LOG_APPEND("========== Locally Installed Jetbrains Applications ==========\n")
     auto entries = localJetbrainsApplications.entryList();
-    entries.removeOne("jetbrains-toolbox.desktop");
+    entries.removeOne(QStringLiteral("jetbrains-toolbox.desktop"));
     for (const auto &item: qAsConst(entries)) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(localPath + item)->
@@ -201,11 +201,11 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
         }
     }
     // Globally installed
-    const QString globalPath = "/usr/share/applications/";
-    const QDir globalJetbrainsApplications(globalPath, {"jetbrains-*"});
+    const QString globalPath = QStringLiteral("/usr/share/applications/");
+    const QDir globalJetbrainsApplications(globalPath, {QStringLiteral("jetbrains-*")});
     JBR_FILE_LOG_APPEND("========== Globally Installed Jetbrains Applications ==========\n")
     auto globalEntries = globalJetbrainsApplications.entryList();
-    globalEntries.removeOne("jetbrains-toolbox.desktop");
+    globalEntries.removeOne(QStringLiteral("jetbrains-toolbox.desktop"));
     for (const auto &item: qAsConst(globalEntries)) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(globalPath + item)->
@@ -216,7 +216,8 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
 
     // AUR/Snap/Other  installed
     JBR_FILE_LOG_APPEND("========== AUR/Snap/Other Installed Jetbrains Applications ==========\n")
-    for (const auto &item : getAdditionalDesktopFileLocations()) {
+    const auto additionalEntries = getAdditionalDesktopFileLocations();
+    for (const auto &item : additionalEntries) {
         if (!item.isEmpty()) {
             applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(item)->
                     group("Desktop Entry").readEntry("Name")), item);

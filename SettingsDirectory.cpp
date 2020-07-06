@@ -9,12 +9,11 @@ SettingsDirectory::SettingsDirectory(QString directory, QString name) : director
         directory)), name(std::move(name)) {}
 
 QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debugMessage) {
-    const QString home = QDir::homePath();
     QStringList entries = getAllSettingsDirectories();
     QList<SettingsDirectory> dirs;
 
     // Iterate reversed over entries
-    const QRegularExpression configFolderName(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
+    const QRegularExpression configFolderName(QStringLiteral(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)"));
     const int maxIndex = entries.size() - 1;
     for (int i = maxIndex; i <= maxIndex && i >= 0; i--) {
         auto const &e = entries.at(i);
@@ -95,7 +94,7 @@ QString SettingsDirectory::getExistingConfigDir(const QString &dir) {
 
 QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) {
     const QString home = QDir::homePath();
-    const QRegularExpression configFolder(R"(^\.[A-Z][a-zA-Z]+(\d+\.\d+)$)");
+    const QRegularExpression configFolder(QStringLiteral(R"(^\.[A-Z][a-zA-Z]+(\d+\.\d+)$)"));
     QStringList entries;
     const auto oldConfigLocations = QDir(home).entryList(QDir::Hidden | QDir::Dirs).filter(configFolder);
     for (const auto &e: oldConfigLocations) {
@@ -106,7 +105,7 @@ QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) 
     for (const auto &entry: newConfigLocations) {
         entries.append(home + "/.config/JetBrains/" + entry);
     }
-    JBR_FILE_LOG_APPEND(QString("All settings directories:") + '\n')
+    JBR_FILE_LOG_APPEND(QStringLiteral("All settings directories:") + '\n')
     JBR_FILE_LOG_APPEND(entries.join(';') + '\n')
     return entries;
 }
