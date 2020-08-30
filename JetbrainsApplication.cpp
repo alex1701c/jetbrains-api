@@ -3,6 +3,8 @@
 #include <KSharedConfig>
 #include <KConfigCore/KConfigGroup>
 #include <QtGui/QtGui>
+#include <QtXml/QDomDocument>
+#include <getopt.h>
 #include "macros.h"
 
 JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher) :
@@ -38,86 +40,86 @@ JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool 
     }
 }
 
-
-void JetbrainsApplication::parseXMLFile(QString content, QString *debugMessage) {
+void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessage) {
     // Recent folders are in recentProjectDirectories.xml or in recentProjects.xml located
     // If the method is triggered by the file watcher the content is provided
-    if (content.isEmpty()) {
-        if (this->configFolder.isEmpty()) return;
-        QFile f(this->configFolder + "recentProjectDirectories.xml");
-        if (!f.exists()) {
-            QFile f2(this->configFolder + "recentProjects.xml");
-            if (!f2.open(QIODevice::ReadOnly)) {
-                f2.close();
-                JBR_FILE_LOG_APPEND("No config file found for " + this->name + " " + this->desktopFilePath + "\n")
-                return;
-            }
-            if (fileWatcher) {
-                this->addPath(f2.fileName());
-            }
-            JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + f2.fileName() + "\n")
-            content = f2.readAll();
-            f2.close();
-        } else {
-            if (f.open(QIODevice::ReadOnly)) {
-                content = f.readAll();
-                f.close();
-                if (fileWatcher) {
-                    this->addPath(f.fileName());
-                }
-                JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + f.fileName() + "\n")
-            }
+    QString fileName = file;
+    if (fileName.isEmpty()) {
+        if (this->configFolder.isEmpty()) {
+            return;
         }
+        if (QFileInfo::exists(this->configFolder + "recentProjectDirectories.xml")) {
+            fileName = this->configFolder + "recentProjectDirectories.xml";
+        }
+        if (QFileInfo::exists(this->configFolder + "recentProjects.xml")) {
+            fileName = this->configFolder + "recentProjects.xml";
+        }
+        // JetBrains Rider has a differently called file
+        if (QFileInfo::exists(this->configFolder + "recentSolutions.xml")) {
+            fileName = this->configFolder + "recentSolutions.xml";
+        }
+        if (fileName.isEmpty()) {
+            JBR_FILE_LOG_APPEND("No config file found for " + this->name + " " + this->desktopFilePath + "\n")
+            return;
+        }
+        JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + fileName + "\n")
+    }
+    JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + fileName + "\n")
+    if (fileWatcher) {
+        this->addPath(fileName);
     }
 
-    if (content.isEmpty()) {
+    if (QFileInfo(fileName).size() == 0) {
         JBR_FILE_LOG_APPEND(name + " file content is empty \n")
         return;
     }
 
-    // Go to RecentDirectoryProjectsManager component
-    QXmlStreamReader reader(content);
-    reader.readNextStartElement();
-    reader.readNextStartElement();
-
-    // Go through elements until the recentPaths option element is selected
-    for (int i = 0; i < 4; ++i) {
-        reader.readNextStartElement();
-        if (reader.name() != QLatin1String("option")
-        || reader.attributes().value(QLatin1String("name")) != QLatin1String("recentPaths")) {
-            reader.skipCurrentElement();
-        } else {
-            reader.name();
-            break;
-        }
+    QDomDocument d;
+    QFile xmlFile(fileName);
+    if (!d.setContent(&xmlFile)) {
+        JBR_FILE_LOG_APPEND(fileName + " file could not be parsed \n")
     }
-
-    // Extract paths from XML element
-    while (reader.readNextStartElement()) {
-        if (reader.name() == QLatin1String("option")) {
-            QString recentPath = reader.attributes()
-                    .value(QLatin1String("value"))
-                    .toString()
-                    .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
-            if (QDir(recentPath).exists()) {
-                Project project;
-                project.path = recentPath;
-                QFile nameFile(recentPath + QStringLiteral("/.idea/.name"));
-                if (nameFile.exists()) {
-                    if (nameFile.open(QFile::ReadOnly)) {
-                        project.name = nameFile.readAll();
-                    }
-                }
-                if (project.name.isEmpty()) {
-                    project.name = recentPath.split('/').last();
-                }
-                this->recentlyUsed.append(project);
-            } else {
-                JBR_FILE_LOG_APPEND(name + " the project path does not exist " + recentPath + '\n')
+    const QDomNodeList optionList = d.elementsByTagName(QStringLiteral("option"));
+    for (int i = 0; i < optionList.count(); ++i) {
+        const QDomNode optionNode = optionList.at(i);
+        if (!optionNode.isElement()) {
+            continue;
+        }
+        const QDomElement option = optionNode.toElement();
+        if (option.attribute("name") == QLatin1String("recentPaths")) {
+            const QDomNodeList recentPathsList = option.elementsByTagName("list");
+            if (recentPathsList.isEmpty()) {
+                continue;
             }
-            reader.readElementText();
+            const QDomNodeList recentPathNodes = recentPathsList.at(0).childNodes();
+            for (int j = 0; j < recentPathNodes.count(); ++j) {
+                QString recentPath = recentPathNodes.at(j).toElement()
+                        .attribute(QStringLiteral("value"))
+                        .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
+            if (QFileInfo::exists(recentPath)) {
+                    Project project;
+                    project.path = recentPath;
+                    QString projectRootPath = recentPath;
+                    if (QFileInfo(projectRootPath).isFile()) {
+                        projectRootPath = QFileInfo(projectRootPath).dir().absolutePath();
+                    }
+                    QFile nameFile(projectRootPath + QStringLiteral("/.idea/.name"));
+                    if (nameFile.exists()) {
+                        if (nameFile.open(QFile::ReadOnly)) {
+                            project.name = nameFile.readAll();
+                        }
+                    }
+                    if (project.name.isEmpty()) {
+                        project.name = projectRootPath.split('/').last();
+                    }
+                    this->recentlyUsed.append(project);
+                } else {
+                    JBR_FILE_LOG_APPEND(name + " the project path does not exist " + recentPath + '\n')
+                }
+            }
         }
     }
+
     JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====\n")
     if (!recentlyUsed.isEmpty()) {
         for (const auto &recent: qAsConst(recentlyUsed)) {
@@ -136,7 +138,8 @@ void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QS
     }
 }
 
-QList<JetbrainsApplication *> JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
+QList<JetbrainsApplication *>
+JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
     QList<JetbrainsApplication *> notEmpty;
     JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps ==========\n")
     for (auto const &app: qAsConst(apps)) {
@@ -167,8 +170,10 @@ QStringList JetbrainsApplication::getAdditionalDesktopFileLocations() {
             QStringLiteral("/var/lib/snapd/desktop/applications/pycharm-professional_pycharm-professional.desktop"),
             QStringLiteral("/var/lib/snapd/desktop/applications/rubymine_rubymine.desktop"),
             QStringLiteral("/var/lib/snapd/desktop/applications/webstorm_webstorm.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/intellij-idea-community_intellij-idea-community.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/intellij-idea-educational_intellij-idea-educational.desktop"),
+            QStringLiteral(
+                    "/var/lib/snapd/desktop/applications/intellij-idea-community_intellij-idea-community.desktop"),
+            QStringLiteral(
+                    "/var/lib/snapd/desktop/applications/intellij-idea-educational_intellij-idea-educational.desktop"),
             QStringLiteral("/var/lib/snapd/desktop/applications/intellij-idea-ultimate_intellij-idea-ultimate.desktop"),
             QStringLiteral("/var/lib/snapd/desktop/applications/phpstorm_phpstorm.desktop"),
             QStringLiteral("/var/lib/snapd/desktop/applications/rider_rider.desktop"),
@@ -240,40 +245,40 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
     JBR_FILE_LOG_APPEND("Application path map: \n")
     for (const auto &path : applicationPaths.toStdMap()) {
         Q_UNUSED(path)
-        JBR_FILE_LOG_APPEND(path.first + " ==> " +path.second + "\n")
+        JBR_FILE_LOG_APPEND(path.first + " ==> " + path.second + "\n")
     }
     return applicationPaths;
 }
 
 QString JetbrainsApplication::filterApplicationName(const QString &name) {
     return QString(name)
-        .remove(QLatin1String(" Release"))
-        .remove(QLatin1String(" Edition"))
-        .remove(QLatin1String(" + JBR11"))
-        .remove(QLatin1String(" RC"))
-        .remove(QLatin1String(" EAP"));
+            .remove(QLatin1String(" Release"))
+            .remove(QLatin1String(" Edition"))
+            .remove(QLatin1String(" + JBR11"))
+            .remove(QLatin1String(" RC"))
+            .remove(QLatin1String(" EAP"));
 }
 
 QString JetbrainsApplication::formatOptionText(const QString &formatText, const Project &project) {
     QString txt = QString(formatText)
-        .replace(QLatin1String(FormatString::PROJECT), project.name)
-        .replace(QLatin1String(FormatString::APPNAME), this->name)
-        .replace(QLatin1String(FormatString::APP), this->shortName);
+            .replace(QLatin1String(FormatString::PROJECT), project.name)
+            .replace(QLatin1String(FormatString::APPNAME), this->name)
+            .replace(QLatin1String(FormatString::APP), this->shortName);
     if (txt.contains(QLatin1String(FormatString::DIR))) {
-        txt.replace(QLatin1String(FormatString::DIR), QString(project.path).replace(QDir::homePath(), QLatin1String("~")));
+        txt.replace(QLatin1String(FormatString::DIR),
+                    QString(project.path).replace(QDir::homePath(), QLatin1String("~")));
     }
     return txt;
 }
 
-QDebug operator<<(QDebug d, const JetbrainsApplication *app)
-{
-    d   << " name: " << app->name
-        << " desktopFilePath: " << app->desktopFilePath
-        << " executablePath: " << app->executablePath
-        << " configFolder: " << app->configFolder
-        << " iconPath: " << app->iconPath
-        << " shortName: " << app->shortName
-        << " recentlyUsed: ";
+QDebug operator<<(QDebug d, const JetbrainsApplication *app) {
+    d << " name: " << app->name
+      << " desktopFilePath: " << app->desktopFilePath
+      << " executablePath: " << app->executablePath
+      << " configFolder: " << app->configFolder
+      << " iconPath: " << app->iconPath
+      << " shortName: " << app->shortName
+      << " recentlyUsed: ";
     for (const auto &project : qAsConst(app->recentlyUsed)) {
         d << project.name << project.path;
     }

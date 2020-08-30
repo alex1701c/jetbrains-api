@@ -4,7 +4,7 @@
 #include <QDebug>
 #include "Project.h"
 #include <QFileSystemWatcher>
-#include <QFile>
+#include <QFileInfo>
 #include <KConfigCore/KConfigGroup>
 
 class JetbrainsApplication : public QFileSystemWatcher {
@@ -39,7 +39,7 @@ public:
      * recentProjectDirectories.xml or recentProjects.xml in the apps config dir get parsed.
      * @param debugMessage optional QString pointer which can be used to debug the parsing process
      */
-    void parseXMLFile(QString fileContent = QString(), QString *debugMessage = nullptr);
+    void parseXMLFile(const QString &fileName = QString(), QString *debugMessage = nullptr);
 
     /**
      * @param apps
@@ -77,11 +77,9 @@ public:
 public Q_SLOTS:
 
     void configChanged(const QString &file) {
-        QFile f(file);
-        if (f.exists() && f.open(QIODevice::ReadOnly)) {
+        if (QFileInfo::exists(file)) {
             this->recentlyUsed.clear();
-            QString content = f.readAll();
-            this->parseXMLFile(content);
+            this->parseXMLFile(file);
         }
     };
 };

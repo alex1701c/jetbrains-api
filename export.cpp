@@ -13,9 +13,8 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
         // Desktop file is manually specified
         if (mappingMap.contains(p.second)) {
             auto customMappedApp = new JetbrainsApplication(p.second, fileWatchers);
-            QFile xmlConfigFile(mappingMap.value(p.second));
-            if (xmlConfigFile.open(QFile::ReadOnly)) {
-                customMappedApp->parseXMLFile(xmlConfigFile.readAll());
+            if (QFileInfo::exists(mappingMap.value(p.second))) {
+                customMappedApp->parseXMLFile(mappingMap.value(p.second));
                 // Add path for filewatcher
                 customMappedApp->addPath(mappingMap.value(p.second));
                 if (!filterEmpty || !customMappedApp->recentlyUsed.isEmpty()) {
