@@ -73,6 +73,7 @@ public:
     QString configFolder;
     QString shortName;
     QString nameArray[2] = {"", ""};
+    bool checkIfProjectsExist = true; // for test purposes
 
 public Q_SLOTS:
 

@@ -96,7 +96,7 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
                 QString recentPath = recentPathNodes.at(j).toElement()
                         .attribute(QStringLiteral("value"))
                         .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
-            if (QFileInfo::exists(recentPath)) {
+            if (!checkIfProjectsExist || QFileInfo::exists(recentPath)) {
                     Project project;
                     project.path = recentPath;
                     QString projectRootPath = recentPath;

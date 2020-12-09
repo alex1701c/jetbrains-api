@@ -1,0 +1,51 @@
+<application>
+    <component name="RiderRecentProjectsManager">
+        <option name="additionalInfo">
+            <map>
+                <entry key="$USER_HOME$/UnityProjects/tower-defense/tower-defense.sln">
+                    <value>
+                        <RecentProjectMetaInfo projectWorkspaceId="1Xp54tfcoj209watEav62AEtouT">
+                            <option name="binFolder" value="$APPLICATION_HOME_DIR$/bin" />
+                            <option name="build" value="RD-201.7846.1" />
+                            <option name="buildTimestamp" value="1589564119082" />
+                            <frame x="-1" y="-1" width="1922" height="1052" extendedState="6" />
+                            <option name="productionCode" value="RD" />
+                            <option name="projectOpenTimestamp" value="1591299440116" />
+                        </RecentProjectMetaInfo>
+                    </value>
+                </entry>
+                <entry key="$USER_HOME$/UnityProjects/Pentecost/Pentecost.sln">
+                    <value>
+                        <RecentProjectMetaInfo projectWorkspaceId="1croOZAyyvczxsZ4V2cQJTlXD2X">
+                            <option name="binFolder" value="$APPLICATION_HOME_DIR$/bin" />
+                            <option name="build" value="RD-201.7846.1" />
+                            <option name="buildTimestamp" value="1589564115550" />
+                            <option name="productionCode" value="RD" />
+                            <option name="projectOpenTimestamp" value="1591643202778" />
+                        </RecentProjectMetaInfo>
+                    </value>
+                </entry>
+                <entry key="$USER_HOME$/Projects/Blazor/ComponentLibrary/ComponentLibrary.sln">
+                    <value>
+                        <RecentProjectMetaInfo opened="true" projectWorkspaceId="1cEPcSigXVSIwQ5f6RWQafItRpz">
+                            <option name="binFolder" value="$APPLICATION_HOME_DIR$/bin" />
+                            <option name="build" value="RD-201.7846.1" />
+                            <option name="buildTimestamp" value="1589564150214" />
+                            <frame x="-4" y="-1" width="1928" height="1055" extendedState="6" />
+                            <option name="productionCode" value="RD" />
+                            <option name="projectOpenTimestamp" value="1597069979098" />
+                        </RecentProjectMetaInfo>
+                    </value>
+                </entry>
+            </map>
+        </option>
+        <option name="lastProjectLocation" value="$USER_HOME$/Projects" />
+        <option name="recentPaths">
+            <list>
+                <option value="$USER_HOME$/Projects/Blazor/ComponentLibrary/ComponentLibrary.sln" />
+                <option value="$USER_HOME$/UnityProjects/Pentecost/Pentecost.sln" />
+                <option value="$USER_HOME$/UnityProjects/tower-defense/tower-defense.sln" />
+            </list>
+        </option>
+    </component>
+</application>
