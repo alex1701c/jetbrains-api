@@ -29,11 +29,17 @@ private Q_SLOTS:
             QCOMPARE(projects.at(i).path, expectedPath);
         }
     };
+    void testCLionXMLParsing_data(){
+        QTest::addColumn<QString>("configFolder");
+        QTest::newRow("old format") << QFINDTESTDATA("data/jetbrains-clion/");
+        QTest::newRow("new format") << QFINDTESTDATA("data/jetbrains-clion2020.3/");
+    }
     void testCLionXMLParsing(){
+        QFETCH(QString, configFolder);
         JetbrainsApplication application(QFINDTESTDATA("data/jetbrains-clion.desktop"));
         application.checkIfProjectsExist = false;
         QCOMPARE(application.name, QStringLiteral("CLion"));
-        application.configFolder = QFINDTESTDATA("data/jetbrains-clion/");
+        application.configFolder = configFolder;
         application.parseXMLFile();
         const QList<Project> projects = application.recentlyUsed;
         QVERIFY(!projects.isEmpty());
