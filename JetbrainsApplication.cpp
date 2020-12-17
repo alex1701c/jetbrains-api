@@ -73,13 +73,7 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
         return;
     }
 
-    QDomDocument d;
-    QFile xmlFile(fileName);
-    if (!d.setContent(&xmlFile)) {
-        JBR_FILE_LOG_APPEND(fileName + " file could not be parsed \n")
-    }
-    const QDomNodeList optionList = d.elementsByTagName(QStringLiteral("option"));
-    parseOldStyleXMLFile(optionList);
+    parseOldStyleXMLFile(fileName);
     if (recentlyUsed.isEmpty()) {
         parseNewStyleXMLFile(fileName);
     }
@@ -249,8 +243,12 @@ QDebug operator<<(QDebug d, const JetbrainsApplication *app) {
     return d;
 }
 
-void JetbrainsApplication::parseOldStyleXMLFile(const QDomNodeList &list)
+void JetbrainsApplication::parseOldStyleXMLFile(const QString &fileName)
 {
+    QDomDocument d;
+    QFile xmlFile(fileName);
+    d.setContent(&xmlFile);
+    const QDomNodeList list = d.elementsByTagName(QStringLiteral("option"));
     for (int i = 0; i < list.count(); ++i) {
         const QDomNode optionNode = list.at(i);
         if (!optionNode.isElement()) {

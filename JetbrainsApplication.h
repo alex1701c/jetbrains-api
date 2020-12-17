@@ -85,7 +85,7 @@ public Q_SLOTS:
         }
     };
 private:
-    void parseOldStyleXMLFile(const QDomNodeList &list);
+    void parseOldStyleXMLFile(const QString &fileName);
     void parseNewStyleXMLFile(const QString &fileName);
     void addRecentlyUsed(const QString &path);
 };
