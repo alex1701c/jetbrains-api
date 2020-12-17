@@ -5,6 +5,7 @@
 #include "Project.h"
 #include <QFileSystemWatcher>
 #include <QFileInfo>
+#include <QDomNodeList>
 #include <KConfigCore/KConfigGroup>
 
 class JetbrainsApplication : public QFileSystemWatcher {
@@ -83,6 +84,10 @@ public Q_SLOTS:
             this->parseXMLFile(file);
         }
     };
+private:
+    void parseOldStyleXMLFile(const QDomNodeList &list);
+    void parseNewStyleXMLFile(const QString &fileName);
+    void addRecentlyUsed(const QString &path);
 };
 
 

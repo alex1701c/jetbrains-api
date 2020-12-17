@@ -4,7 +4,6 @@
 #include <KConfigCore/KConfigGroup>
 #include <QtGui/QtGui>
 #include <QtXml/QDomDocument>
-#include <getopt.h>
 #include "macros.h"
 
 JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher) :
@@ -80,44 +79,9 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
         JBR_FILE_LOG_APPEND(fileName + " file could not be parsed \n")
     }
     const QDomNodeList optionList = d.elementsByTagName(QStringLiteral("option"));
-    for (int i = 0; i < optionList.count(); ++i) {
-        const QDomNode optionNode = optionList.at(i);
-        if (!optionNode.isElement()) {
-            continue;
-        }
-        const QDomElement option = optionNode.toElement();
-        if (option.attribute("name") == QLatin1String("recentPaths")) {
-            const QDomNodeList recentPathsList = option.elementsByTagName("list");
-            if (recentPathsList.isEmpty()) {
-                continue;
-            }
-            const QDomNodeList recentPathNodes = recentPathsList.at(0).childNodes();
-            for (int j = 0; j < recentPathNodes.count(); ++j) {
-                QString recentPath = recentPathNodes.at(j).toElement()
-                        .attribute(QStringLiteral("value"))
-                        .replace(QLatin1String("$USER_HOME$"), QDir::homePath());
-            if (!checkIfProjectsExist || QFileInfo::exists(recentPath)) {
-                    Project project;
-                    project.path = recentPath;
-                    QString projectRootPath = recentPath;
-                    if (QFileInfo(projectRootPath).isFile()) {
-                        projectRootPath = QFileInfo(projectRootPath).dir().absolutePath();
-                    }
-                    QFile nameFile(projectRootPath + QStringLiteral("/.idea/.name"));
-                    if (nameFile.exists()) {
-                        if (nameFile.open(QFile::ReadOnly)) {
-                            project.name = nameFile.readAll();
-                        }
-                    }
-                    if (project.name.isEmpty()) {
-                        project.name = projectRootPath.split('/').last();
-                    }
-                    this->recentlyUsed.append(project);
-                } else {
-                    JBR_FILE_LOG_APPEND(name + " the project path does not exist " + recentPath + '\n')
-                }
-            }
-        }
+    parseOldStyleXMLFile(optionList);
+    if (recentlyUsed.isEmpty()) {
+        parseNewStyleXMLFile(fileName);
     }
 
     JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====\n")
@@ -283,4 +247,83 @@ QDebug operator<<(QDebug d, const JetbrainsApplication *app) {
         d << project.name << project.path;
     }
     return d;
+}
+
+void JetbrainsApplication::parseOldStyleXMLFile(const QDomNodeList &list)
+{
+    for (int i = 0; i < list.count(); ++i) {
+        const QDomNode optionNode = list.at(i);
+        if (!optionNode.isElement()) {
+            continue;
+        }
+        const QDomElement option = optionNode.toElement();
+        if (option.attribute("name") == QLatin1String("recentPaths")) {
+            const QDomNodeList recentPathsList = option.elementsByTagName("list");
+            if (recentPathsList.isEmpty()) {
+                continue;
+            }
+            const QDomNodeList recentPathNodes = recentPathsList.at(0).childNodes();
+            for (int j = 0; j < recentPathNodes.count(); ++j) {
+                addRecentlyUsed(recentPathNodes.at(j).toElement().attribute(QStringLiteral("value")));
+            }
+        }
+    }
+}
+
+void JetbrainsApplication::parseNewStyleXMLFile(const QString &fileName)
+{
+    // Initialize variables and find element containing the data
+    QDomDocument d;
+    QFile xmlFile(fileName);
+    d.setContent(&xmlFile);
+    QDomNodeList recentPathsMap;
+    QList<QPair<QString, double>> pathTimestampMap;
+    const auto component = d.elementsByTagName(QStringLiteral("option"));
+    for (int i = 0; i < component.count(); ++i) {
+        if (component.at(i).isElement() && component.at(i).toElement().attribute("name") == "additionalInfo") {
+            recentPathsMap = component.at(i).firstChild().childNodes();
+        }
+    }
+
+    // Parse the data
+    for (int i = 0; i < recentPathsMap.count(); ++i) {
+        const QDomNode _entry = recentPathsMap.at(i);
+        if (!_entry.isElement()) {
+            continue;
+        }
+        const QDomElement entry = _entry.toElement();
+        const QString path = entry.attribute("key");
+        const QDomElement valueEntry = entry.firstChildElement("value");
+        const QDomElement metaInfo = valueEntry.firstChildElement("RecentProjectMetaInfo");
+        double projectOpenTimestamp = metaInfo.lastChildElement("option").attribute("value").toDouble();
+        pathTimestampMap.append(qMakePair(path, projectOpenTimestamp));
+    }
+    std::sort(pathTimestampMap.begin(), pathTimestampMap.end(),
+          [](QPair<QString, double> &first, QPair<QString, double> &second) { return first.second > second.second; });
+    for (const auto &pair : qAsConst(pathTimestampMap)) {
+        addRecentlyUsed(pair.first);
+    }
+}
+
+void JetbrainsApplication::addRecentlyUsed(const QString &path)
+{
+    QString recentPath = QString(path).replace(QLatin1String("$USER_HOME$"), QDir::homePath());
+    if (!checkIfProjectsExist || QFileInfo::exists(recentPath)) {
+        Project project;
+        project.path = recentPath;
+        QString projectRootPath = recentPath;
+        if (QFileInfo(projectRootPath).isFile()) {
+            projectRootPath = QFileInfo(projectRootPath).dir().absolutePath();
+        }
+        QFile nameFile(projectRootPath + QStringLiteral("/.idea/.name"));
+        if (nameFile.exists()) {
+            if (nameFile.open(QFile::ReadOnly)) {
+                project.name = nameFile.readAll();
+            }
+        }
+        if (project.name.isEmpty()) {
+            project.name = projectRootPath.split('/').last();
+        }
+        this->recentlyUsed.append(project);
+    }
 }
