@@ -50,11 +50,6 @@ public:
     static QList<JetbrainsApplication *> filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage = nullptr);
 
     /**
-     * @return hardcoded list of .desktop files that exist
-     */
-    static QStringList getAdditionalDesktopFileLocations();
-
-    /**
      * Utility function that removes unwanted parts of the app name
      * @param name
      */

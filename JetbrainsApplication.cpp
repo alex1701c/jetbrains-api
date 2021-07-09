@@ -1,6 +1,7 @@
 #include "JetbrainsApplication.h"
 #include "ConfigKeys.h"
 #include <KSharedConfig>
+#include <KApplicationTrader>
 #include <KConfigCore/KConfigGroup>
 #include <QtGui/QtGui>
 #include <QtXml/QDomDocument>
@@ -111,80 +112,25 @@ JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *d
     return notEmpty;
 }
 
-QStringList JetbrainsApplication::getAdditionalDesktopFileLocations() {
-    const QStringList additionalDesktopFileLocations = {
-            // AUR applications
-            QStringLiteral("/usr/share/applications/rubymine.desktop"),
-            QStringLiteral("/usr/share/applications/pycharm-professional.desktop"),
-            QStringLiteral("/usr/share/applications/pycharm-eap.desktop"),
-            QStringLiteral("/usr/share/applications/charm.desktop"),
-            QStringLiteral("/usr/share/applications/rider.desktop"),
-            // Snap applications
-            QStringLiteral("/var/lib/snapd/desktop/applications/clion_clion.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/datagrip_datagrip.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/goland_goland.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/pycharm-community_pycharm-community.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/pycharm-educational_pycharm-educational.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/pycharm-professional_pycharm-professional.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/rubymine_rubymine.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/webstorm_webstorm.desktop"),
-            QStringLiteral(
-                    "/var/lib/snapd/desktop/applications/intellij-idea-community_intellij-idea-community.desktop"),
-            QStringLiteral(
-                    "/var/lib/snapd/desktop/applications/intellij-idea-educational_intellij-idea-educational.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/intellij-idea-ultimate_intellij-idea-ultimate.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/phpstorm_phpstorm.desktop"),
-            QStringLiteral("/var/lib/snapd/desktop/applications/rider_rider.desktop"),
-    };
-    QStringList validFiles;
-    for (const auto &additionalFile: additionalDesktopFileLocations) {
-        if (QFile::exists(additionalFile)) {
-            validFiles.append(additionalFile);
-        }
-    }
-
-    return validFiles;
-}
-
 QMap<QString, QString>
 JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMappingConfig, QString *debugMessage) {
     QMap<QString, QString> applicationPaths;
-
-    // Manually, locally or with Toolbox installed
-    const QString localPath = QDir::homePath() + "/.local/share/applications/";
-    const QDir localJetbrainsApplications(localPath, {"jetbrains-*"});
-    JBR_FILE_LOG_APPEND("========== Locally Installed Jetbrains Applications ==========\n")
-    auto entries = localJetbrainsApplications.entryList();
-    entries.removeOne("jetbrains-toolbox.desktop");
-    for (const auto &item: qAsConst(entries)) {
-        if (!item.isEmpty()) {
-            applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(localPath + item)->
-                    group("Desktop Entry").readEntry("Name")), localPath + item);
-            JBR_FILE_LOG_APPEND(localPath + item + "\n")
+    const KService::List apps = KApplicationTrader::query([debugMessage](const KService::Ptr &service){
+        if (service->entryPath().contains("jetbrains-toolbox")) {
+            return false;
         }
-    }
-    // Globally installed
-    const QString globalPath = "/usr/share/applications/";
-    const QDir globalJetbrainsApplications(globalPath, {"jetbrains-*"});
-    JBR_FILE_LOG_APPEND("========== Globally Installed Jetbrains Applications ==========\n")
-    auto globalEntries = globalJetbrainsApplications.entryList();
-    globalEntries.removeOne("jetbrains-toolbox.desktop");
-    for (const auto &item: qAsConst(globalEntries)) {
-        if (!item.isEmpty()) {
-            applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(globalPath + item)->
-                    group("Desktop Entry").readEntry("Name")), globalPath + item);
-            JBR_FILE_LOG_APPEND(globalPath + item + "\n")
+        if (service->entryPath().contains("jetbrains-")) {
+            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on jetbrains- text in path\n")
+            return true;
         }
-    }
-
-    // AUR/Snap/Other  installed
-    JBR_FILE_LOG_APPEND("========== AUR/Snap/Other Installed Jetbrains Applications ==========\n")
-    for (const auto &item : getAdditionalDesktopFileLocations()) {
-        if (!item.isEmpty()) {
-            applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(item)->
-                    group("Desktop Entry").readEntry("Name")), item);
-            JBR_FILE_LOG_APPEND(item + "\n")
+        if (service->property("StartupWMClass", QVariant::String).toString().startsWith("jetbrains-")) {
+            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on StartupWMClass\n")
+            return true;
         }
+        return false;
+    });
+    for (const auto &service : apps) {
+        applicationPaths.insert(filterApplicationName(service->name()), service->entryPath());
     }
 
     // Add manually configured entries
@@ -194,8 +140,7 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
     }
     for (const auto &mappingEntry: customMappingConfig.entryMap().toStdMap()) {
         if (QFile::exists(mappingEntry.first) && QFile::exists(mappingEntry.second)) {
-            applicationPaths.insert(filterApplicationName(KSharedConfig::openConfig(mappingEntry.first)->
-                    group("Desktop Entry").readEntry("Name")), mappingEntry.first);
+            applicationPaths.insert(filterApplicationName(KService(mappingEntry.first).name()), mappingEntry.first);
             JBR_FILE_LOG_APPEND(mappingEntry.first + "\n")
             JBR_FILE_LOG_APPEND(mappingEntry.second + "\n")
         }

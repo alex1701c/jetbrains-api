@@ -1,4 +1,6 @@
 #include "export.h"
+#include <KConfigGroup>
+
 
 namespace JetbrainsAPI {
 QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty, bool fileWatchers) {

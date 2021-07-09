@@ -13,3 +13,6 @@ add_library(jetbrains_api_static STATIC ${jetbrains_api_SRCS})
 target_link_libraries(jetbrains_api_static KF5::ConfigCore Qt5::Xml)
 
 add_subdirectory(tests)
+
+find_package(KF5 REQUIRED COMPONENTS Config Service)
+target_link_libraries(jetbrains_api_static KF5::ConfigCore KF5::Service)
