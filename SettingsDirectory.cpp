@@ -106,6 +106,10 @@ QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) 
     for (const auto &entry: newConfigLocations) {
         entries.append(home + "/.config/JetBrains/" + entry);
     }
+    const auto googleConfigLocations = QDir(home + "/.config/Google").entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (const auto &entry: googleConfigLocations) {
+        entries.append(entry.absoluteFilePath());
+    }
     JBR_FILE_LOG_APPEND(QString("All settings directories:") + '\n')
     JBR_FILE_LOG_APPEND(entries.join(';') + '\n')
     return entries;
