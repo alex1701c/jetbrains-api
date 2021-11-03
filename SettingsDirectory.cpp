@@ -79,7 +79,8 @@ QMap<QString, QString> SettingsDirectory::getAliases() {
             {"IntelliJ IDEA Community", "IdeaIC"},
             {"IntelliJ IDEA Ultimate",  "IntelliJIdea"},
             {"PyCharm Professional",    "PyCharm"},
-            {"PyCharm Community",       "PyCharmCE"}
+            {"PyCharm Community",       "PyCharmCE"},
+            {"Android Studio (Canary Branch)", "AndroidStudioPreview"},
     };
 }
 
