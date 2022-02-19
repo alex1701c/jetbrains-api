@@ -7,7 +7,7 @@
 #include <QtXml/QDomDocument>
 #include "macros.h"
 
-JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher) :
+JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher, bool shouldNotTrimEdition) :
         QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
     KConfigGroup config = KSharedConfig::openConfig(desktopFilePath)->group("Desktop Entry");
     iconPath = config.readEntry("Icon");
@@ -20,7 +20,8 @@ JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool 
             .remove(QLatin1String(" + JBR11"))
             .remove(QLatin1String(" RC"))
             .remove(QLatin1String(" EAP"))
-            .replace(QLatin1String("Community"), QLatin1String("CE"));
+            .replace(QLatin1String("IntelliJ IDEA"), QLatin1String("IntelliJ"))
+            .replace(QLatin1String(" Community"), shouldNotTrimEdition ? QStringLiteral(" CE") : QString());
 
     // Allow the user to search for both names like Android Studio
     auto nameList = filterApplicationName(QString(name))

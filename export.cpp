@@ -1,5 +1,7 @@
 #include "export.h"
 #include <KConfigGroup>
+#include <QRegularExpression>
+#include <algorithm>
 
 
 namespace JetbrainsAPI {
@@ -10,8 +12,20 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
     const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(
         config.group(Config::customMappingGroup));
 
+    const auto desktopPathsMap = desktopPaths.toStdMap();
+    std::map<QString, QString> specialEditions;
+     // This should extract "pycharm" from "jetbrains-pycharm-ce.desktop"
+    const QRegularExpression baseNameExpr(QStringLiteral("jetbrains-([a-z]+)(-[a-z])?+"));
+    for (const auto &p: desktopPathsMap) {
+        const QRegularExpressionMatch regexMatch = baseNameExpr.match(p.second);
+        if (regexMatch.hasMatch()) {
+            Q_ASSERT(regexMatch.capturedTexts().length() >= 2);
+            specialEditions.insert(std::pair(QFileInfo(p.second).baseName(), regexMatch.capturedTexts().at(1)));
+        }
+    }
+
     // Split manually configured and automatically found apps
-    for (const auto &p:desktopPaths.toStdMap()) {
+    for (const auto &p: desktopPathsMap) {
         // Desktop file is manually specified
         if (mappingMap.contains(p.second)) {
             auto customMappedApp = new JetbrainsApplication(p.second, fileWatchers);
@@ -24,7 +38,11 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
                 }
             }
         } else {
-            automaticAppList.append(new JetbrainsApplication(p.second, fileWatchers));
+            const QString baseName = QFileInfo(p.second).baseName();
+            bool shouldNotTrimEdition = std::any_of(specialEditions.begin(), specialEditions.end(), [baseName](const std::pair<QString, QString> &value){
+                return baseName.contains(value.second) && baseName != value.first;
+            });
+            automaticAppList.append(new JetbrainsApplication(p.second, fileWatchers, shouldNotTrimEdition));
         }
     }
 
