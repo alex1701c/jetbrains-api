@@ -8,9 +8,8 @@ namespace JetbrainsAPI {
 QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty, bool fileWatchers) {
     QList<JetbrainsApplication *> appList;
     QList<JetbrainsApplication *> automaticAppList;
-    const auto mappingMap = config.group(Config::customMappingGroup).entryMap();
-    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(
-        config.group(Config::customMappingGroup));
+    const QMap<QString, QString> mappingMap = config.isValid() ? config.group(Config::customMappingGroup).entryMap() : QMap<QString, QString>();
+    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(config.isValid() ? config.group(Config::customMappingGroup): config);
 
     const auto desktopPathsMap = desktopPaths.toStdMap();
     std::map<QString, QString> specialEditions;
@@ -53,23 +52,6 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
         automaticAppList = JetbrainsApplication::filterApps(automaticAppList);
     }
     appList.append(automaticAppList);
-    return appList;
-}
-
-QList<JetbrainsApplication *> fetchApplications(bool filterEmpty, bool fileWatchers) {
-    QList<JetbrainsApplication *> appList;
-    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(KConfigGroup());
-
-    // Split manually configured and automatically found apps
-    for (const auto &p:desktopPaths.toStdMap()) {
-        appList.append(new JetbrainsApplication(p.second, fileWatchers));
-    }
-
-    SettingsDirectory::findCorrespondingDirectories(SettingsDirectory::getSettingsDirectories(), appList);
-    JetbrainsApplication::parseXMLFiles(appList);
-    if (filterEmpty){
-        return JetbrainsApplication::filterApps(appList);
-    }
     return appList;
 }
 

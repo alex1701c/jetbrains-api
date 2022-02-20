@@ -38,7 +38,7 @@ private Q_SLOTS:
         QVERIFY(QFile::copy(QFINDTESTDATA("data/jetbrains-idea-ce.desktop"), fileTargetCommunity));
         ensureCacheValid();
 
-        const auto apps = JetbrainsAPI::fetchApplications(KSharedConfig::openStateConfig()->group("Test"), false);
+        const auto apps = JetbrainsAPI::fetchApplications(false, false);
         QCOMPARE(apps.count(), 1);
         QCOMPARE(apps.first()->name, "IntelliJ IDEA Community");
         QCOMPARE(apps.first()->shortName, "IntelliJ");

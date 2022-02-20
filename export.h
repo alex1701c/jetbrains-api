@@ -19,7 +19,9 @@ namespace JetbrainsAPI {
      * @param filterEmpty remove apps that have no recent projects from the list
      * @param fileWatchers use file watchers to reparse the recent projects when they change
      */
-    QList<JetbrainsApplication *> fetchApplications(bool filterEmpty = true, bool fileWatchers = true);
+    inline QList<JetbrainsApplication *> fetchApplications(bool filterEmpty = true, bool fileWatchers = true) {
+        return fetchApplications(KConfigGroup(), filterEmpty, fileWatchers);
+    }
 
     /**
      * Get the JetbrainsApplications without reading the recent projects
