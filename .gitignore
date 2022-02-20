@@ -4,5 +4,6 @@
 /cmake-build*
 /target
 *.swap
+*.kate-swp
 *.kdev4
 compile_commands.json
