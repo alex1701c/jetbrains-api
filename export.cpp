@@ -19,7 +19,7 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
         const QRegularExpressionMatch regexMatch = baseNameExpr.match(p.second);
         if (regexMatch.hasMatch()) {
             Q_ASSERT(regexMatch.capturedTexts().length() >= 2);
-            specialEditions.insert(std::pair(QFileInfo(p.second).baseName(), regexMatch.capturedTexts().at(1)));
+            specialEditions.insert(std::pair<QString, QString>(QFileInfo(p.second).baseName(), regexMatch.capturedTexts().at(1)));
         }
     }
 
