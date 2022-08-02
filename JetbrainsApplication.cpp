@@ -120,8 +120,8 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
         if (service->entryPath().contains("jetbrains-toolbox")) {
             return false;
         }
-        if (service->entryPath().contains("jetbrains-")) {
-            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on jetbrains- text in path\n")
+        if (service->entryPath().contains("jetbrains-") || service->entryPath().contains("com.jetbrains.")) {
+            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on entry path\n")
             return true;
         }
         if (service->property("StartupWMClass", QVariant::String).toString().startsWith("jetbrains-")) {
