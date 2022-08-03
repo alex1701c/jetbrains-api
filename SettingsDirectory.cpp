@@ -9,12 +9,11 @@ SettingsDirectory::SettingsDirectory(QString directory, QString name) : director
         directory)), name(std::move(name)) {}
 
 QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debugMessage) {
-    const QString home = QDir::homePath();
     const QStringList entries = getAllSettingsDirectories();
     QList<SettingsDirectory> dirs;
 
     // Iterate reversed over entries
-    QRegularExpression configFolderName(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
+    const QRegularExpression configFolderName(R"(\.?([A-Z][a-zA-Z]+)(\d+\.\d+)$)");
     const int maxIndex = entries.size() - 1;
     for (int i = maxIndex; i <= maxIndex && i >= 0; i--) {
         auto const &e = entries.at(i);
