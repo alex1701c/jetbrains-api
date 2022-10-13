@@ -155,12 +155,14 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
 }
 
 QString JetbrainsApplication::filterApplicationName(const QString &name) {
+    const static QRegularExpression versionPostfixRegex(QStringLiteral(" \\d{4}.\\d.\\d"));
     return QString(name)
             .remove(QLatin1String(" Release"))
             .remove(QLatin1String(" Edition"))
             .remove(QLatin1String(" + JBR11"))
             .remove(QLatin1String(" RC"))
-            .remove(QLatin1String(" EAP"));
+            .remove(QLatin1String(" EAP"))
+            .remove(versionPostfixRegex);
 }
 
 QString JetbrainsApplication::formatOptionText(const QString &formatText, const Project &project) {
