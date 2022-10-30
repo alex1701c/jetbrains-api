@@ -7,11 +7,13 @@
 #include <QtXml/QDomDocument>
 #include "macros.h"
 
+#include <KIO/DesktopExecParser>
+
 JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher, bool shouldNotTrimEdition) :
         QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
     KConfigGroup config = KSharedConfig::openConfig(desktopFilePath)->group("Desktop Entry");
     iconPath = config.readEntry("Icon");
-    executablePath = config.readEntry("Exec").remove("%u").remove("%f");
+    executablePath = KIO::DesktopExecParser::executablePath(config.readEntry("Exec"));
     name = config.readEntry("Name");
     shortName = QString(name)
             .remove(QLatin1String(" Edition"))
