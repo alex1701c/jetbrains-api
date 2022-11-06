@@ -11,7 +11,10 @@ JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool 
         QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
     KConfigGroup config = KSharedConfig::openConfig(desktopFilePath)->group("Desktop Entry");
     iconPath = config.readEntry("Icon");
-    executablePath = config.readEntry("Exec").remove("%u").remove("%f");
+    executablePath = config.readEntry("Exec")
+                         .remove("%u")
+                         .remove("%f") // Remove placeholders
+                         .trimmed(); // Trim leftover whitespaces
     name = config.readEntry("Name");
     shortName = QString(name)
             .remove(QLatin1String(" Edition"))

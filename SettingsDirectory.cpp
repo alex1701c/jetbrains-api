@@ -1,9 +1,11 @@
-#include <utility>
-#include <QtCore>
 #include "SettingsDirectory.h"
 #include "JetbrainsApplication.h"
 #include "macros.h"
+#include <utility>
 
+#include <QDir>
+#include <QRegularExpression>
+#include <QStandardPaths>
 
 SettingsDirectory::SettingsDirectory(QString directory, QString name) : directory(std::move(
         directory)), name(std::move(name)) {}
@@ -111,19 +113,23 @@ QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) 
         entries.append(home + '/' + e);
     }
 
-    const auto newConfigLocations = QDir(home + "/.config/JetBrains").entryList(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (const auto &entry: newConfigLocations) {
-        entries.append(home + "/.config/JetBrains/" + entry);
+    using QSP = QStandardPaths;
+    const QString jetbrainsConfigFolder = QSP::writableLocation(QSP::GenericConfigLocation) + "/JetBrains/";
+    const QStringList newConfigLocations = QDir(jetbrainsConfigFolder).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (const QString &entry : newConfigLocations) {
+        entries.append(jetbrainsConfigFolder + entry);
     }
     // For Android Studio
-    const auto googleConfigLocations = QDir(home + "/.config/Google").entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (const auto &entry: googleConfigLocations) {
-        entries.append(entry.absoluteFilePath());
+    const QString googleConfigFolder = QSP::writableLocation(QSP::GenericConfigLocation) + "/Google/";
+    const QStringList googleConfigLocations = QDir(googleConfigFolder).entryList(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (const QString &entry : googleConfigLocations) {
+        entries.append(googleConfigFolder + entry);
     }
     // For Flatpaks
-    const auto flatpakLocations = QDir(home + "/.var/app").entryInfoList({QStringLiteral("com.jetbrains*")}, QDir::NoDotAndDotDot | QDir::Dirs);
-    for (const auto &entry : flatpakLocations) {
-        entries.append(entry.absoluteFilePath());
+    const QString flatpakConfigFolder = home + "/.var/app/";
+    const QStringList flatpakLocations = QDir(flatpakConfigFolder).entryList({QStringLiteral("com.jetbrains*")}, QDir::NoDotAndDotDot | QDir::Dirs);
+    for (const QString &entry : flatpakLocations) {
+        entries.append(flatpakConfigFolder + entry);
     }
     JBR_FILE_LOG_APPEND(QString("All settings directories:") + '\n')
     JBR_FILE_LOG_APPEND(entries.join(';') + '\n')
