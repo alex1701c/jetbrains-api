@@ -21,14 +21,14 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
         auto const &e = entries.at(i);
         // Contains name and version number live testing => https://regex101.com/r/pMOkox/1
         const QString dirName = QDir(e).dirName();
-        const auto regexMatch = configFolderName.match(dirName);
+        const auto regexMatch = configFolderName.match(dirName); // clazy:exclude=use-static-qregularexpression
         if (regexMatch.hasMatch() && regexMatch.lastCapturedIndex()) {
             dirs.append(SettingsDirectory(e, regexMatch.captured(1)));
         } else if (e.contains(QLatin1String(".var/app/com.jetbrains"))) {
             QDir flatpakSettingsDir(e + QLatin1String("/config/JetBrains"));
             const auto flatpakConfigEntries = flatpakSettingsDir.entryInfoList();
             for (const QFileInfo &info : flatpakConfigEntries) {
-                auto match = configFolderName.match(info.fileName());
+                auto match = configFolderName.match(info.fileName()); // clazy:exclude=use-static-qregularexpression
                 if (match.hasMatch()) {
                     dirs.append(SettingsDirectory(info.absoluteFilePath(), match.captured(1)));
                 }
