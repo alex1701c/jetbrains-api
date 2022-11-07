@@ -20,6 +20,7 @@ private Q_SLOTS:
     void initTestCase() {
         QSP::setTestModeEnabled(true);
         dir = QSP::writableLocation(QSP::ApplicationsLocation);
+        QDir(dir).removeRecursively(); // Clean up leftovers from other test
         QDir(dir).mkpath(QStringLiteral("."));
 
         fileTargetUltimate =  dir+ QLatin1String("/jetbrains-idea.desktop");
@@ -35,6 +36,7 @@ private Q_SLOTS:
     }
 
     void testNameFormattingWithOnlyOneEdition() {
+        QFile::remove(fileTargetCommunity);
         QVERIFY(QFile::copy(QFINDTESTDATA("data/jetbrains-idea-ce.desktop"), fileTargetCommunity));
         ensureCacheValid();
 

@@ -125,6 +125,7 @@ QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) 
     for (const QString &entry : googleConfigLocations) {
         entries.append(googleConfigFolder + entry);
     }
+
     // For Flatpaks
     const QString flatpakConfigFolder = home + "/.var/app/";
     const QStringList flatpakLocations = QDir(flatpakConfigFolder).entryList({QStringLiteral("com.jetbrains*")}, QDir::NoDotAndDotDot | QDir::Dirs);

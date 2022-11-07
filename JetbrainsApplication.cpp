@@ -119,7 +119,14 @@ JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *d
 QMap<QString, QString>
 JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMappingConfig, QString *debugMessage) {
     QMap<QString, QString> applicationPaths;
-    const KService::List apps = KApplicationTrader::query([debugMessage](const KService::Ptr &service){
+    const KService::List apps = KApplicationTrader::query([debugMessage](const KService::Ptr &service) {
+        // Only take test files into account
+        if (QStandardPaths::isTestModeEnabled()) {
+            if (!service->entryPath().contains(".qttest")) {
+                return false;
+            }
+        }
+
         if (service->entryPath().contains("jetbrains-toolbox")) {
             return false;
         }
