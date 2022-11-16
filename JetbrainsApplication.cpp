@@ -63,18 +63,17 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
             fileName = this->configFolder + "recentSolutions.xml";
         }
         if (fileName.isEmpty()) {
-            JBR_FILE_LOG_APPEND("No config file found for " + this->name + " " + this->desktopFilePath + "\n")
+            JBR_FILE_LOG_APPEND("No config file found for " + this->name + " " + this->desktopFilePath)
             return;
         }
-        JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + fileName + "\n")
+        JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + fileName)
     }
-    JBR_FILE_LOG_APPEND("Config file found for " + this->name + " " + fileName + "\n")
     if (fileWatcher) {
         this->addPath(fileName);
     }
 
     if (QFileInfo(fileName).size() == 0) {
-        JBR_FILE_LOG_APPEND(name + " file content is empty \n")
+        JBR_FILE_LOG_APPEND(name + " file content is empty")
         return;
     }
 
@@ -83,14 +82,14 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
         parseNewStyleXMLFile(fileName);
     }
 
-    JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====\n")
+    JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====")
     if (!recentlyUsed.isEmpty()) {
         for (const auto &recent: qAsConst(recentlyUsed)) {
             Q_UNUSED(recent)
-            JBR_FILE_LOG_APPEND("    " + recent.path + "\n")
+            JBR_FILE_LOG_APPEND("    " + recent.path)
         }
     } else {
-        JBR_FILE_LOG_APPEND("    NO PROJECTS\n")
+        JBR_FILE_LOG_APPEND("    NO PROJECTS")
     }
     JBR_FILE_LOG_APPEND("\n")
 }
@@ -104,12 +103,12 @@ void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QS
 QList<JetbrainsApplication *>
 JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
     QList<JetbrainsApplication *> notEmpty;
-    JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps ==========\n")
+    JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps ==========")
     for (auto const &app: qAsConst(apps)) {
         if (!app->recentlyUsed.empty()) {
             notEmpty.append(app);
         } else {
-            JBR_FILE_LOG_APPEND("Found not projects for: " + app->name + "\n")
+            JBR_FILE_LOG_APPEND("Found not projects for: " + app->name)
             delete app;
         }
     }
@@ -131,35 +130,38 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
             return false;
         }
         if (service->entryPath().contains("jetbrains-") || service->entryPath().contains("com.jetbrains.")) {
-            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on entry path\n")
+            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on entry path")
             return true;
         }
         if (service->property("StartupWMClass", QVariant::String).toString().startsWith("jetbrains-")) {
-            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on StartupWMClass\n")
+            JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on StartupWMClass")
             return true;
         }
         return false;
     });
+
     for (const auto &service : apps) {
         applicationPaths.insert(filterApplicationName(service->name()), service->entryPath());
     }
 
     // Add manually configured entries
-    JBR_FILE_LOG_APPEND("========== Manually Configured Jetbrains Applications ==========\n")
     if (!customMappingConfig.isValid()) {
         return applicationPaths;
     }
-    for (const auto &mappingEntry: customMappingConfig.entryMap().toStdMap()) {
-        if (QFile::exists(mappingEntry.first) && QFile::exists(mappingEntry.second)) {
-            applicationPaths.insert(filterApplicationName(KService(mappingEntry.first).name()), mappingEntry.first);
-            JBR_FILE_LOG_APPEND(mappingEntry.first + "\n")
-            JBR_FILE_LOG_APPEND(mappingEntry.second + "\n")
+    if (!customMappingConfig.keyList().isEmpty()) {
+        JBR_FILE_LOG_APPEND("========== Manually Configured Jetbrains Applications ==========")
+        for (const auto &mappingEntry : customMappingConfig.entryMap().toStdMap()) {
+            if (QFile::exists(mappingEntry.first) && QFile::exists(mappingEntry.second)) {
+                applicationPaths.insert(filterApplicationName(KService(mappingEntry.first).name()), mappingEntry.first);
+                JBR_FILE_LOG_APPEND(mappingEntry.first)
+                JBR_FILE_LOG_APPEND(mappingEntry.second)
+            }
         }
     }
-    JBR_FILE_LOG_APPEND("Application path map: \n")
+    JBR_FILE_LOG_APPEND("Application path map:")
     for (const auto &path : applicationPaths.toStdMap()) {
         Q_UNUSED(path)
-        JBR_FILE_LOG_APPEND(path.first + " ==> " + path.second + "\n")
+        JBR_FILE_LOG_APPEND(path.first + " ==> " + path.second)
     }
     return applicationPaths;
 }

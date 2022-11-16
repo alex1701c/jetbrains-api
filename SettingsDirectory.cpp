@@ -35,9 +35,9 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
             }
         }
     }
-    JBR_FILE_LOG_APPEND("========== Find Available Config Folders ==========\n");
+    JBR_FILE_LOG_APPEND("========== Find Available Config Folders ==========");
     for (const auto &d: qAsConst(dirs)) {
-        JBR_FILE_LOG_APPEND(d.name + " " + d.directory + "\n");
+        JBR_FILE_LOG_APPEND(d.name + " " + d.directory);
     }
     return dirs;
 }
@@ -50,12 +50,12 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == app->name) {
             app->configFolder = getExistingConfigDir(dir.directory);
-            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder + '\n')
+            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder)
             return;
         }
         if (dir.name == QString(app->name).remove(' ')) {
             app->configFolder = getExistingConfigDir(dir.directory);
-            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder + '\n')
+            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder)
             return;
         }
     }
@@ -63,13 +63,13 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
     // Handle Ultimate/Community editions and experimental java runtime
     QMap<QString, QString> aliases = getAliases();
     if (!aliases.contains(app->name)) {
-        JBR_FILE_LOG_APPEND(app->name + " is not contained in alias" + '\n')
+        JBR_FILE_LOG_APPEND(app->name + " is not contained in alias")
         return;
     }
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == aliases.find(app->name).value()) {
             app->configFolder = getExistingConfigDir(dir.directory);
-            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder + ' '+  " from alias" + '\n')
+            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder + ' ' + " from alias")
             return;
         }
     }
@@ -132,8 +132,8 @@ QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) 
     for (const QString &entry : flatpakLocations) {
         entries.append(flatpakConfigFolder + entry);
     }
-    JBR_FILE_LOG_APPEND(QString("All settings directories:") + '\n')
-    JBR_FILE_LOG_APPEND(entries.join(';') + '\n')
+    JBR_FILE_LOG_APPEND("All settings directories:")
+    JBR_FILE_LOG_APPEND(entries.join(';'))
     return entries;
 }
 
