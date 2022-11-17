@@ -73,7 +73,7 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
     }
 
     if (QFileInfo(fileName).size() == 0) {
-        JBR_FILE_LOG_APPEND(name + " file content is empty")
+        JBR_FILE_LOG_APPEND("File " + fileName + "for app " + name + " has empty content")
         return;
     }
 
