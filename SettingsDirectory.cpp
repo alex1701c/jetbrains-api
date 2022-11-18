@@ -45,17 +45,16 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
 void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory> &dirs,
         JetbrainsApplication *app,
         QString *debugMessage) {
-    app->name = JetbrainsApplication::filterApplicationName(app->name);
     // Exact match or space in name
     for (const auto &dir: qAsConst(dirs)) {
         if (dir.name == app->name) {
             app->configFolder = getExistingConfigDir(dir.directory);
-            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder)
+            JBR_FILE_LOG_APPEND("found config folder " + app->configFolder + " for " + app->name)
             return;
         }
         if (dir.name == QString(app->name).remove(' ')) {
             app->configFolder = getExistingConfigDir(dir.directory);
-            JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder)
+            JBR_FILE_LOG_APPEND("found config folder " + app->configFolder + " for " + app->name)
             return;
         }
     }

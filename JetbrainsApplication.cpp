@@ -15,7 +15,7 @@ JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool 
                          .remove("%u")
                          .remove("%f") // Remove placeholders
                          .trimmed(); // Trim leftover whitespaces
-    name = config.readEntry("Name");
+    name = filterApplicationName(config.readEntry("Name"));
     shortName = QString(name)
             .remove(QLatin1String(" Edition"))
             .remove(QLatin1String(" Professional"))
