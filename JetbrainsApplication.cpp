@@ -4,8 +4,11 @@
 #include <KApplicationTrader>
 #include <KConfigCore/KConfigGroup>
 #include <QtGui/QtGui>
+#include <QMetaType>
 #include <QtXml/QDomDocument>
 #include "macros.h"
+
+#include "kservice_version.h"
 
 JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher, bool shouldNotTrimEdition) :
         QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
@@ -133,7 +136,12 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
             JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on entry path")
             return true;
         }
-        if (service->property("StartupWMClass", QVariant::String).toString().startsWith("jetbrains-")) {
+#if KSERVICE_VERSION >= QT_VERSION_CHECK(5, 102, 0)
+        const auto stringVariant = QMetaType::QString;
+#else
+        const auto stringVariant = QVariant::String;
+#endif
+        if (service->property("StartupWMClass", stringVariant).toString().startsWith("jetbrains-")) {
             JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on StartupWMClass")
             return true;
         }
