@@ -3,8 +3,7 @@
 
 #include <QString>
 
-class Project {
-public:
+struct Project {
     QString name;
     QString path;
 };
