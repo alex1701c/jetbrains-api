@@ -1,12 +1,16 @@
 #include "JetbrainsApplication.h"
+
 #include "ConfigKeys.h"
-#include <KSharedConfig>
-#include <KApplicationTrader>
-#include <KConfigCore/KConfigGroup>
-#include <QtGui/QtGui>
-#include <QMetaType>
-#include <QtXml/QDomDocument>
 #include "macros.h"
+
+#include <QDir>
+#include <QDomDocument>
+#include <QFileInfo>
+#include <QMetaType>
+
+#include <KApplicationTrader>
+#include <KConfigGroup>
+#include <KSharedConfig>
 
 #include "kservice_version.h"
 
