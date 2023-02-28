@@ -288,6 +288,9 @@ void JetbrainsApplication::addRecentlyUsed(const QString &path)
                 project.name = nameFile.readAll();
             }
         }
+        if (project.path.endsWith(QLatin1String(".sln"))) {
+            project.name = QFileInfo(project.path).completeBaseName();
+        }
         if (project.name.isEmpty()) {
             project.name = projectRootPath.split('/').last();
         }
