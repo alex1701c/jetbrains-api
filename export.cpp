@@ -11,37 +11,36 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
     const QMap<QString, QString> mappingMap = config.isValid() ? config.group(Config::customMappingGroup).entryMap() : QMap<QString, QString>();
     const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(config.isValid() ? config.group(Config::customMappingGroup): config);
 
-    const auto desktopPathsMap = desktopPaths.toStdMap();
     std::map<QString, QString> specialEditions;
      // This should extract "pycharm" from "jetbrains-pycharm-ce.desktop"
     const QRegularExpression baseNameExpr(QStringLiteral("jetbrains-([a-z]+)(-[a-z])?+"));
-    for (const auto &p: desktopPathsMap) {
-        const QRegularExpressionMatch regexMatch = baseNameExpr.match(p.second);
+    for (const QString &path: desktopPaths) {
+        const QRegularExpressionMatch regexMatch = baseNameExpr.match(path);
         if (regexMatch.hasMatch()) {
             Q_ASSERT(regexMatch.capturedTexts().length() >= 2);
-            specialEditions.insert(std::pair<QString, QString>(QFileInfo(p.second).baseName(), regexMatch.capturedTexts().at(1)));
+            specialEditions.insert(std::pair<QString, QString>(QFileInfo(path).baseName(), regexMatch.capturedTexts().at(1)));
         }
     }
 
     // Split manually configured and automatically found apps
-    for (const auto &p: desktopPathsMap) {
+    for (const QString &path: desktopPaths) {
         // Desktop file is manually specified
-        if (mappingMap.contains(p.second)) {
-            auto customMappedApp = new JetbrainsApplication(p.second, fileWatchers);
-            if (QFileInfo::exists(mappingMap.value(p.second))) {
-                customMappedApp->parseXMLFile(mappingMap.value(p.second));
+        if (mappingMap.contains(path)) {
+            auto customMappedApp = new JetbrainsApplication(path, fileWatchers);
+            if (QFileInfo::exists(mappingMap.value(path))) {
+                customMappedApp->parseXMLFile(mappingMap.value(path));
                 // Add path for filewatcher
-                customMappedApp->addPath(mappingMap.value(p.second));
+                customMappedApp->addPath(mappingMap.value(path));
                 if (!filterEmpty || !customMappedApp->recentlyUsed.isEmpty()) {
                     appList.append(customMappedApp);
                 }
             }
         } else {
-            const QString baseName = QFileInfo(p.second).baseName();
+            const QString baseName = QFileInfo(path).baseName();
             bool shouldNotTrimEdition = std::any_of(specialEditions.begin(), specialEditions.end(), [baseName](const std::pair<QString, QString> &value){
                 return baseName.contains(value.second) && baseName != value.first;
             });
-            automaticAppList.append(new JetbrainsApplication(p.second, fileWatchers, shouldNotTrimEdition));
+            automaticAppList.append(new JetbrainsApplication(path, fileWatchers, shouldNotTrimEdition));
         }
     }
 
