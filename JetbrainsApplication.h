@@ -5,8 +5,9 @@
 #include "Project.h"
 #include <QFileSystemWatcher>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QDomNodeList>
-#include <KConfigCore/KConfigGroup>
+#include <KConfigGroup>
 
 class JetbrainsApplication : public QFileSystemWatcher {
 Q_OBJECT

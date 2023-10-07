@@ -107,12 +107,13 @@ void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QS
 QList<JetbrainsApplication *>
 JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
     QList<JetbrainsApplication *> notEmpty;
-    JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps ==========")
+    JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps, number of apps: " + QString::number(apps.count()))
     for (auto const &app: qAsConst(apps)) {
         if (!app->recentlyUsed.empty()) {
             notEmpty.append(app);
+            JBR_FILE_LOG_APPEND("Found projects for: " + app->name+ " " + QString::number(app->recentlyUsed.count()))
         } else {
-            JBR_FILE_LOG_APPEND("Found not projects for: " + app->name)
+            JBR_FILE_LOG_APPEND("Found no projects for: " + app->name)
             delete app;
         }
     }
@@ -167,10 +168,12 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
             }
         }
     }
-    JBR_FILE_LOG_APPEND("Application path map:")
-    for (const auto &path : applicationPaths.toStdMap()) {
-        Q_UNUSED(path)
-        JBR_FILE_LOG_APPEND(path.first + " ==> " + path.second)
+    JBR_FILE_LOG_APPEND("========= Application path map ==========")
+    for (auto it = applicationPaths.begin(), end=applicationPaths.end(); it != end; ++it) {
+        JBR_FILE_LOG_APPEND(it.key() + " ==> " + it.value())
+    }
+    if (applicationPaths.isEmpty()) {
+        JBR_FILE_LOG_APPEND("No jetbrains apps were found")
     }
     return applicationPaths;
 }
