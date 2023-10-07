@@ -13,7 +13,7 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
 
     std::map<QString, QString> specialEditions;
      // This should extract "pycharm" from "jetbrains-pycharm-ce.desktop"
-    const QRegularExpression baseNameExpr(QStringLiteral("jetbrains-([a-z]+)(-[a-z])?+"));
+    static const QRegularExpression baseNameExpr(QStringLiteral("jetbrains-([a-z]+)(-[a-z])?+"));
     for (const QString &path: desktopPaths) {
         const QRegularExpressionMatch regexMatch = baseNameExpr.match(path);
         if (regexMatch.hasMatch()) {
