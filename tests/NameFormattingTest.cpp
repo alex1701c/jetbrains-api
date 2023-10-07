@@ -1,11 +1,9 @@
 
 #include <QObject>
-#include <QtTest/QtTest>
-#include <QtTest/qtestcase.h>
 #include <KSycoca>
-#include <kapplicationtrader.h>
-#include <qglobal.h>
+#include <QDir>
 #include <KSharedConfig>
+#include <QTest>
 #include "../JetbrainsApplication.h"
 #include "../export.h"
 

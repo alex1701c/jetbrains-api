@@ -12,7 +12,7 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 find_package(KF${QT_MAJOR_VERSION} REQUIRED COMPONENTS Config Service I18n)
 find_package(Qt${QT_MAJOR_VERSION} REQUIRED COMPONENTS Xml)
 
-set(jetbrains_api_SRCS JetbrainsApplication.cpp SettingsDirectory.cpp export.cpp tests/XMLParserTest.cpp)
+set(jetbrains_api_SRCS JetbrainsApplication.cpp SettingsDirectory.cpp export.cpp)
 add_library(jetbrains_api_static STATIC ${jetbrains_api_SRCS})
 target_link_libraries(jetbrains_api_static Qt::Xml KF${QT_MAJOR_VERSION}::ConfigCore KF${QT_MAJOR_VERSION}::Service)
 

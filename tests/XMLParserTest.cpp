@@ -1,5 +1,5 @@
 #include <QObject>
-#include <QtTest/QtTest>
+#include <QTest>
 #include "../JetbrainsApplication.h"
 
 class XMLParserTest : public QObject {
