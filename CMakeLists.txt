@@ -12,8 +12,7 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 find_package(KF${QT_MAJOR_VERSION} REQUIRED COMPONENTS Config Service I18n)
 find_package(Qt${QT_MAJOR_VERSION} REQUIRED COMPONENTS Xml)
 
-set(jetbrains_api_SRCS JetbrainsApplication.cpp SettingsDirectory.cpp export.cpp)
-add_library(jetbrains_api_static STATIC ${jetbrains_api_SRCS})
+add_library(jetbrains_api_static STATIC JetbrainsApplication.cpp SettingsDirectory.cpp export.cpp)
 target_link_libraries(jetbrains_api_static Qt::Xml KF${QT_MAJOR_VERSION}::ConfigCore KF${QT_MAJOR_VERSION}::Service)
 
 include(ECMQtDeclareLoggingCategory)
@@ -26,7 +25,7 @@ ecm_qt_declare_logging_category(jetbrains_api_static
 )
 ecm_qt_install_logging_categories(
     EXPORT JETBRAINS
-    FILE  ${PROJECT_NAME}.categories
+    FILE ${PROJECT_NAME}.categories
     DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
 )
 
