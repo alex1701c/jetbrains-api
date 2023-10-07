@@ -300,3 +300,4 @@ void JetbrainsApplication::addRecentlyUsed(const QString &path)
         this->recentlyUsed.append(project);
     }
 }
+#include "moc_JetbrainsApplication.cpp"
