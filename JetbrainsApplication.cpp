@@ -141,7 +141,7 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
 #if QT_VERSION_MAJOR == 6
         if (service->property<QString>("StartupWMClass").startsWith("jetbrains-")) {
 #elif KSERVICE_VERSION >= QT_VERSION_CHECK(5, 102, 0)
-        if (service->property("StartupWMClass", QMetaType::String).toString().startsWith("jetbrains-")) {
+        if (service->property("StartupWMClass", QMetaType::QString).toString().startsWith("jetbrains-")) {
 #else
         const auto stringVariant = QVariant::String;
         if (service->property("StartupWMClass", QVariant::String).toString().startsWith("jetbrains-")) {
