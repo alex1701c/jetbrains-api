@@ -138,12 +138,14 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
             JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on entry path")
             return true;
         }
-#if KSERVICE_VERSION >= QT_VERSION_CHECK(5, 102, 0)
-        const auto stringVariant = QMetaType::QString;
+#if QT_VERSION_MAJOR == 6
+        if (service->property<QString>("StartupWMClass").startsWith("jetbrains-")) {
+#elif KSERVICE_VERSION >= QT_VERSION_CHECK(5, 102, 0)
+        if (service->property("StartupWMClass", QMetaType::String).toString().startsWith("jetbrains-")) {
 #else
         const auto stringVariant = QVariant::String;
+        if (service->property("StartupWMClass", QVariant::String).toString().startsWith("jetbrains-")) {
 #endif
-        if (service->property("StartupWMClass", stringVariant).toString().startsWith("jetbrains-")) {
             JBR_FILE_LOG_APPEND("Found " + service->entryPath() + " based on StartupWMClass")
             return true;
         }
