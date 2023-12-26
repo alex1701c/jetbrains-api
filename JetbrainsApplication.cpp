@@ -12,7 +12,8 @@
 #include <KConfigGroup>
 #include <KSharedConfig>
 
-#include "kservice_version.h"
+#include "kservice_version.h" // IWYU pragma: keep
+#include <utility>
 
 JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher, bool shouldNotTrimEdition) :
         QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
@@ -88,7 +89,7 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
 
     JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====")
     if (!recentlyUsed.isEmpty()) {
-        for (const auto &recent: qAsConst(recentlyUsed)) {
+        for (const auto &recent: std::as_const(recentlyUsed)) {
             Q_UNUSED(recent)
             JBR_FILE_LOG_APPEND("    " + recent.path)
         }
@@ -99,7 +100,7 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
 }
 
 void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
-    for (auto &app: qAsConst(apps)) {
+    for (auto &app: std::as_const(apps)) {
         app->parseXMLFile(QString(), debugMessage);
     }
 }
@@ -108,7 +109,7 @@ QList<JetbrainsApplication *>
 JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
     QList<JetbrainsApplication *> notEmpty;
     JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps, number of apps: " + QString::number(apps.count()))
-    for (auto const &app: qAsConst(apps)) {
+    for (auto const &app: std::as_const(apps)) {
         if (!app->recentlyUsed.empty()) {
             notEmpty.append(app);
             JBR_FILE_LOG_APPEND("Found projects for: " + app->name+ " " + QString::number(app->recentlyUsed.count()))
@@ -211,7 +212,7 @@ QDebug operator<<(QDebug d, const JetbrainsApplication *app) {
       << " iconPath: " << app->iconPath
       << " shortName: " << app->shortName
       << " recentlyUsed: ";
-    for (const auto &project : qAsConst(app->recentlyUsed)) {
+    for (const auto &project : std::as_const(app->recentlyUsed)) {
         d << project.name << project.path;
     }
     return d;
@@ -276,7 +277,7 @@ void JetbrainsApplication::parseNewStyleXMLFile(const QString &fileName)
     }
     std::sort(pathTimestampMap.begin(), pathTimestampMap.end(),
           [](QPair<QString, double> &first, QPair<QString, double> &second) { return first.second > second.second; });
-    for (const auto &pair : qAsConst(pathTimestampMap)) {
+    for (const auto &pair : std::as_const(pathTimestampMap)) {
         addRecentlyUsed(pair.first);
     }
 }

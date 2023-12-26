@@ -36,7 +36,7 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
         }
     }
     JBR_FILE_LOG_APPEND("========== Find Available Config Folders ==========");
-    for (const auto &d: qAsConst(dirs)) {
+    for (const auto &d: std::as_const(dirs)) {
         JBR_FILE_LOG_APPEND(d.name + " " + d.directory);
     }
     return dirs;
@@ -46,7 +46,7 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
         JetbrainsApplication *app,
         QString *debugMessage) {
     // Exact match or space in name
-    for (const auto &dir: qAsConst(dirs)) {
+    for (const auto &dir: std::as_const(dirs)) {
         if (dir.name == app->name) {
             app->configFolder = getExistingConfigDir(dir.directory);
             JBR_FILE_LOG_APPEND("found config folder " + app->configFolder + " for " + app->name)
@@ -65,7 +65,7 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
         JBR_FILE_LOG_APPEND(app->name + " is not contained in alias")
         return;
     }
-    for (const auto &dir: qAsConst(dirs)) {
+    for (const auto &dir: std::as_const(dirs)) {
         if (dir.name == aliases.find(app->name).value()) {
             app->configFolder = getExistingConfigDir(dir.directory);
             JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder + ' ' + " from alias")
@@ -78,7 +78,7 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
 void SettingsDirectory::findCorrespondingDirectories(const QList<SettingsDirectory> &dirs,
                                                      QList<JetbrainsApplication *> &apps,
                                                      QString *debugMessage) {
-    for (auto &app: qAsConst(apps)) {
+    for (auto &app: std::as_const(apps)) {
         findCorrespondingDirectory(dirs, app, debugMessage);
     }
 }

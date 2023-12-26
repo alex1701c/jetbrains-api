@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(jetbrains-api)
 
+set(CMAKE_CXX_STANDARD 17)
 set(KF_MIN_VERSION 5.82)
 
 find_package(ECM ${KF_MIN_VERSION} REQUIRED NO_MODULE)
