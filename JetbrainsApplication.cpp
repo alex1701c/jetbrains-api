@@ -221,6 +221,8 @@ void JetbrainsApplication::parseOldStyleXMLFile(const QString &fileName)
 {
     QDomDocument d;
     QFile xmlFile(fileName);
+    bool opened = xmlFile.open(QFile::ReadOnly);
+    Q_ASSERT(opened);
     d.setContent(&xmlFile);
     const QDomNodeList list = d.elementsByTagName(QStringLiteral("option"));
     for (int i = 0; i < list.count(); ++i) {
@@ -247,6 +249,8 @@ void JetbrainsApplication::parseNewStyleXMLFile(const QString &fileName)
     // Initialize variables and find element containing the data
     QDomDocument d;
     QFile xmlFile(fileName);
+    bool opened = xmlFile.open(QFile::ReadOnly);
+    Q_ASSERT(opened);
     d.setContent(&xmlFile);
     QDomNodeList recentPathsMap;
     QList<QPair<QString, double>> pathTimestampMap;
