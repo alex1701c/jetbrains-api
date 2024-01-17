@@ -4,6 +4,8 @@ project(jetbrains-api)
 set(CMAKE_CXX_STANDARD 17)
 set(KF_MIN_VERSION 5.82)
 
+option(INSTALL_LOGGING_CATEGORY OFF)
+
 find_package(ECM ${KF_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_MODULE_PATH})
 include(KDEInstallDirs)
@@ -24,10 +26,12 @@ ecm_qt_declare_logging_category(jetbrains_api_static
     DESCRIPTION "Logging for ${PROJECT_NAME}"
     EXPORT JETBRAINS
 )
-ecm_qt_install_logging_categories(
-    EXPORT JETBRAINS
-    FILE ${PROJECT_NAME}.categories
-    DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
-)
+if(INSTALL_LOGGING_CATEGORY)
+    ecm_qt_install_logging_categories(
+        EXPORT JETBRAINS
+        FILE ${PROJECT_NAME}.categories
+        DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
+    )
+endif()
 
 add_subdirectory(tests)
