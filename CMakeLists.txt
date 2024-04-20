@@ -16,6 +16,7 @@ find_package(KF${QT_MAJOR_VERSION} REQUIRED COMPONENTS Config Service I18n)
 find_package(Qt${QT_MAJOR_VERSION} REQUIRED COMPONENTS Xml)
 
 add_library(jetbrains_api_static STATIC JetbrainsApplication.cpp SettingsDirectory.cpp export.cpp)
+set_target_properties(jetbrains_api_static PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(jetbrains_api_static Qt::Xml KF${QT_MAJOR_VERSION}::ConfigCore KF${QT_MAJOR_VERSION}::Service)
 
 include(ECMQtDeclareLoggingCategory)
