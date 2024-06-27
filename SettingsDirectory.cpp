@@ -85,10 +85,14 @@ void SettingsDirectory::findCorrespondingDirectories(const QList<SettingsDirecto
 
 QMap<QString, QString> SettingsDirectory::getAliases() {
     return {
-            {"IntelliJ IDEA Community", "IdeaIC"},
-            {"IntelliJ IDEA Ultimate",  "IntelliJIdea"},
-            {"PyCharm Professional",    "PyCharm"},
-            {"PyCharm Community",       "PyCharmCE"},
+            {"IntelliJ IDEA Community",        "IdeaIC"},
+            {"IntelliJ IDEA Community EAP",    "IdeaIC"},
+            {"IntelliJ IDEA Ultimate",         "IntelliJIdea"},
+            {"IntelliJ IDEA Ultimate EAP",     "IntelliJIdea"},
+            {"PyCharm Professional",           "PyCharm"},
+            {"PyCharm Professional (EAP)",     "PyCharm"},
+            {"PyCharm Community",              "PyCharmCE"},
+            {"PyCharm Community EAP",          "PyCharmCE"},
             {"Android Studio (Canary Branch)", "AndroidStudioPreview"},
     };
 }
