@@ -35,4 +35,6 @@ if(INSTALL_LOGGING_CATEGORY)
     )
 endif()
 
-add_subdirectory(tests)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
