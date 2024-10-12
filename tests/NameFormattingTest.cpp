@@ -3,6 +3,7 @@
 #include <KSycoca>
 #include <QDir>
 #include <KSharedConfig>
+#include <kservice_version.h>
 #include <QTest>
 #include "../JetbrainsApplication.h"
 #include "../export.h"
@@ -17,6 +18,10 @@ private:
 private Q_SLOTS:
     void initTestCase() {
         QSP::setTestModeEnabled(true);
+#if KSERVICE_VERSION_MAJOR == 6
+        KSycoca::self()->setupTestMenu();
+#endif
+
         dir = QSP::writableLocation(QSP::ApplicationsLocation);
         QDir(dir).removeRecursively(); // Clean up leftovers from other test
         QDir(dir).mkpath(QStringLiteral("."));
