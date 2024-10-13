@@ -1,7 +1,7 @@
-#include "ConfigKeys.h"
+#include "ConfigKeys.h" // IWYU pragma: export
 #include "JetbrainsApplication.h"
-#include "Project.h"
-#include "SettingsDirectory.h"
+#include "Project.h" // IWYU pragma: export
+#include "SettingsDirectory.h" // IWYU pragma: export
 
 namespace JetbrainsAPI
 {
