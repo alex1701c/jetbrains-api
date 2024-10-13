@@ -1,16 +1,17 @@
 #ifndef JETBRAINSAPPLICATION_H
 #define JETBRAINSAPPLICATION_H
 
-#include <QDebug>
 #include "Project.h"
-#include <QFileSystemWatcher>
-#include <QFileInfo>
-#include <QRegularExpression>
-#include <QDomNodeList>
 #include <KConfigGroup>
+#include <QDebug>
+#include <QDomNodeList>
+#include <QFileInfo>
+#include <QFileSystemWatcher>
+#include <QRegularExpression>
 
-class JetbrainsApplication : public QFileSystemWatcher {
-Q_OBJECT
+class JetbrainsApplication : public QFileSystemWatcher
+{
+    Q_OBJECT
 public:
     explicit JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher = true, bool shouldNotTrimEdition = false);
 
@@ -18,15 +19,14 @@ public:
      * Utility function that allows you to debug the apps using
      * @code qInfo() << app;
      */
-    friend QDebug operator << (QDebug d, const JetbrainsApplication *app);
+    friend QDebug operator<<(QDebug d, const JetbrainsApplication *app);
 
     /**
      * @param customMappingConfig
      * @param debugMessage optional QString pointer which can be used to debug the parsing process
      * @return all paths to the .desktop files of the installed Jetbrains IDEs
      */
-    static QMap<QString, QString>
-    getInstalledApplicationPaths(const KConfigGroup &customMappingConfig, QString *debugMessage = nullptr);
+    static QMap<QString, QString> getInstalledApplicationPaths(const KConfigGroup &customMappingConfig, QString *debugMessage = nullptr);
 
     /**
      * Utility function that calls the parseXMLFile function for each app
@@ -74,17 +74,18 @@ public:
 
 public Q_SLOTS:
 
-    void configChanged(const QString &file) {
+    void configChanged(const QString &file)
+    {
         if (QFileInfo::exists(file)) {
             this->recentlyUsed.clear();
             this->parseXMLFile(file);
         }
     };
+
 private:
     void parseOldStyleXMLFile(const QString &fileName);
     void parseNewStyleXMLFile(const QString &fileName);
     void addRecentlyUsed(const QString &path);
 };
 
-
-#endif //JETBRAINSAPPLICATION_H
+#endif // JETBRAINSAPPLICATION_H

@@ -1,6 +1,8 @@
 #ifndef JETBRAINSRUNNER_CONFIGKEYS_H
 #define JETBRAINSRUNNER_CONFIGKEYS_H
 
+#include <qtmetamacros.h>
+
 struct Config {
     constexpr static const auto launchByAppName = "LaunchByAppName";
     constexpr static const auto launchByProjectName = "LaunchByProjectName";
@@ -23,10 +25,10 @@ struct FormatString {
 
 // Used for filtering the project in KRunner
 enum SearchResultChoice {
-   ProjectNameContains,
-   PathContains,
-   ProjectNameStartsWith
+    ProjectNameContains,
+    PathContains,
+    ProjectNameStartsWith,
 };
 Q_ENUMS(SearchResultChoice)
 
-#endif //JETBRAINSRUNNER_CONFIGKEYS_H
+#endif // JETBRAINSRUNNER_CONFIGKEYS_H

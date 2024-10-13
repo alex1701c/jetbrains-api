@@ -10,6 +10,7 @@ find_package(ECM ${KF_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_MODULE_PATH})
 include(KDEInstallDirs)
 include(KDECMakeSettings)
+include(KDEClangFormat)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 
 find_package(KF${QT_MAJOR_VERSION} REQUIRED COMPONENTS Config Service I18n)

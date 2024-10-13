@@ -3,18 +3,19 @@
 #include <QRegularExpression>
 #include <algorithm>
 
-
-namespace JetbrainsAPI {
-QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty, bool fileWatchers) {
+namespace JetbrainsAPI
+{
+QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool filterEmpty, bool fileWatchers)
+{
     QList<JetbrainsApplication *> appList;
     QList<JetbrainsApplication *> automaticAppList;
     const QMap<QString, QString> mappingMap = config.isValid() ? config.group(Config::customMappingGroup).entryMap() : QMap<QString, QString>();
-    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(config.isValid() ? config.group(Config::customMappingGroup): config);
+    const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(config.isValid() ? config.group(Config::customMappingGroup) : config);
 
     std::map<QString, QString> specialEditions;
-     // This should extract "pycharm" from "jetbrains-pycharm-ce.desktop"
+    // This should extract "pycharm" from "jetbrains-pycharm-ce.desktop"
     static const QRegularExpression baseNameExpr(QStringLiteral("jetbrains-([a-z]+)(-[a-z])?+"));
-    for (const QString &path: desktopPaths) {
+    for (const QString &path : desktopPaths) {
         const QRegularExpressionMatch regexMatch = baseNameExpr.match(path);
         if (regexMatch.hasMatch()) {
             Q_ASSERT(regexMatch.capturedTexts().length() >= 2);
@@ -23,7 +24,7 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
     }
 
     // Split manually configured and automatically found apps
-    for (const QString &path: desktopPaths) {
+    for (const QString &path : desktopPaths) {
         // Desktop file is manually specified
         if (mappingMap.contains(path)) {
             auto customMappedApp = new JetbrainsApplication(path, fileWatchers);
@@ -37,7 +38,7 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
             }
         } else {
             const QString baseName = QFileInfo(path).baseName();
-            bool shouldNotTrimEdition = std::any_of(specialEditions.begin(), specialEditions.end(), [baseName](const std::pair<QString, QString> &value){
+            bool shouldNotTrimEdition = std::any_of(specialEditions.begin(), specialEditions.end(), [baseName](const std::pair<QString, QString> &value) {
                 return baseName.contains(value.second) && baseName != value.first;
             });
             automaticAppList.append(new JetbrainsApplication(path, fileWatchers, shouldNotTrimEdition));
@@ -47,29 +48,31 @@ QList<JetbrainsApplication *> fetchApplications(const KConfigGroup &config, bool
     // Find automatically config directory, read config file and filter apps
     SettingsDirectory::findCorrespondingDirectories(SettingsDirectory::getSettingsDirectories(), automaticAppList);
     JetbrainsApplication::parseXMLFiles(automaticAppList);
-    if (filterEmpty){
+    if (filterEmpty) {
         automaticAppList = JetbrainsApplication::filterApps(automaticAppList);
     }
     appList.append(automaticAppList);
     return appList;
 }
 
-QList<JetbrainsApplication *> fetchRawApplications(const KConfigGroup &config){
+QList<JetbrainsApplication *> fetchRawApplications(const KConfigGroup &config)
+{
     QList<JetbrainsApplication *> appList;
     KConfigGroup grp;
     if (config.isValid()) {
-         grp = config.group(Config::customMappingGroup);
+        grp = config.group(Config::customMappingGroup);
     }
     const auto desktopPaths = JetbrainsApplication::getInstalledApplicationPaths(grp);
 
-    for (const auto &p:desktopPaths.toStdMap()) {
+    for (const auto &p : desktopPaths.toStdMap()) {
         appList.append(new JetbrainsApplication(p.second, false));
     }
 
     return appList;
 }
 
-QList<JetbrainsApplication *> fetchRawApplications(){
+QList<JetbrainsApplication *> fetchRawApplications()
+{
     return fetchRawApplications(KConfigGroup());
 }
 

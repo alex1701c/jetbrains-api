@@ -7,10 +7,14 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 
-SettingsDirectory::SettingsDirectory(QString directory, QString name) : directory(std::move(
-        directory)), name(std::move(name)) {}
+SettingsDirectory::SettingsDirectory(QString directory, QString name)
+    : directory(std::move(directory))
+    , name(std::move(name))
+{
+}
 
-QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debugMessage) {
+QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debugMessage)
+{
     const QStringList entries = getAllSettingsDirectories();
     QList<SettingsDirectory> dirs;
 
@@ -36,17 +40,16 @@ QList<SettingsDirectory> SettingsDirectory::getSettingsDirectories(QString *debu
         }
     }
     JBR_FILE_LOG_APPEND("========== Find Available Config Folders ==========");
-    for (const auto &d: std::as_const(dirs)) {
+    for (const auto &d : std::as_const(dirs)) {
         JBR_FILE_LOG_APPEND(d.name + " " + d.directory);
     }
     return dirs;
 }
 
-void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory> &dirs,
-        JetbrainsApplication *app,
-        QString *debugMessage) {
+void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory> &dirs, JetbrainsApplication *app, QString *debugMessage)
+{
     // Exact match or space in name
-    for (const auto &dir: std::as_const(dirs)) {
+    for (const auto &dir : std::as_const(dirs)) {
         if (dir.name == app->name) {
             app->configFolder = getExistingConfigDir(dir.directory);
             JBR_FILE_LOG_APPEND("found config folder " + app->configFolder + " for " + app->name)
@@ -65,7 +68,7 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
         JBR_FILE_LOG_APPEND(app->name + " is not contained in alias")
         return;
     }
-    for (const auto &dir: std::as_const(dirs)) {
+    for (const auto &dir : std::as_const(dirs)) {
         if (dir.name == aliases.find(app->name).value()) {
             app->configFolder = getExistingConfigDir(dir.directory);
             JBR_FILE_LOG_APPEND(app->name + ' ' + app->configFolder + ' ' + " from alias")
@@ -74,30 +77,30 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
     }
 }
 
-
-void SettingsDirectory::findCorrespondingDirectories(const QList<SettingsDirectory> &dirs,
-                                                     QList<JetbrainsApplication *> &apps,
-                                                     QString *debugMessage) {
-    for (auto &app: std::as_const(apps)) {
+void SettingsDirectory::findCorrespondingDirectories(const QList<SettingsDirectory> &dirs, QList<JetbrainsApplication *> &apps, QString *debugMessage)
+{
+    for (auto &app : std::as_const(apps)) {
         findCorrespondingDirectory(dirs, app, debugMessage);
     }
 }
 
-QMap<QString, QString> SettingsDirectory::getAliases() {
+QMap<QString, QString> SettingsDirectory::getAliases()
+{
     return {
-            {"IntelliJ IDEA Community",        "IdeaIC"},
-            {"IntelliJ IDEA Community EAP",    "IdeaIC"},
-            {"IntelliJ IDEA Ultimate",         "IntelliJIdea"},
-            {"IntelliJ IDEA Ultimate EAP",     "IntelliJIdea"},
-            {"PyCharm Professional",           "PyCharm"},
-            {"PyCharm Professional (EAP)",     "PyCharm"},
-            {"PyCharm Community",              "PyCharmCE"},
-            {"PyCharm Community EAP",          "PyCharmCE"},
-            {"Android Studio (Canary Branch)", "AndroidStudioPreview"},
+        {"IntelliJ IDEA Community", "IdeaIC"},
+        {"IntelliJ IDEA Community EAP", "IdeaIC"},
+        {"IntelliJ IDEA Ultimate", "IntelliJIdea"},
+        {"IntelliJ IDEA Ultimate EAP", "IntelliJIdea"},
+        {"PyCharm Professional", "PyCharm"},
+        {"PyCharm Professional (EAP)", "PyCharm"},
+        {"PyCharm Community", "PyCharmCE"},
+        {"PyCharm Community EAP", "PyCharmCE"},
+        {"Android Studio (Canary Branch)", "AndroidStudioPreview"},
     };
 }
 
-QString SettingsDirectory::getExistingConfigDir(const QString &dir) {
+QString SettingsDirectory::getExistingConfigDir(const QString &dir)
+{
     // "/" at end is required for concatenation of filenames
     const QString path = dir + "/config/options/";
     QDir oldDir(path);
@@ -107,12 +110,13 @@ QString SettingsDirectory::getExistingConfigDir(const QString &dir) {
     return dir + "/options/";
 }
 
-QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) {
+QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage)
+{
     const QString home = QDir::homePath();
     const QRegularExpression configFolder(R"(^\.[A-Z][a-zA-Z]+(\d+\.\d+)$)");
     QStringList entries;
     const auto oldConfigLocations = QDir(home).entryList(QDir::Hidden | QDir::Dirs).filter(configFolder);
-    for (const auto &e: oldConfigLocations) {
+    for (const auto &e : oldConfigLocations) {
         entries.append(home + '/' + e);
     }
 
@@ -139,4 +143,3 @@ QStringList SettingsDirectory::getAllSettingsDirectories(QString *debugMessage) 
     JBR_FILE_LOG_APPEND(entries.join(';'))
     return entries;
 }
-

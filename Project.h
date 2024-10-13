@@ -8,6 +8,4 @@ struct Project {
     QString path;
 };
 
-
-
-#endif //JETBRAINSRUNNER_PROJECT_H
+#endif // JETBRAINSRUNNER_PROJECT_H

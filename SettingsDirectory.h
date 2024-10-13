@@ -1,12 +1,11 @@
 #ifndef JETBRAINSRUNNER_SETTINGSDIRECTORY_H
 #define JETBRAINSRUNNER_SETTINGSDIRECTORY_H
 
-
 #include "JetbrainsApplication.h"
 
-class SettingsDirectory {
+class SettingsDirectory
+{
 public:
-
     SettingsDirectory(QString directory, QString name);
 
     /**
@@ -31,9 +30,7 @@ public:
     /**
      * Overload for findCorrespondingDirectory(const QList<SettingsDirectory> &dirs, JetbrainsApplication *app);
      */
-    static void findCorrespondingDirectories(const QList<SettingsDirectory> &dirs,
-                                             QList<JetbrainsApplication *> &apps,
-                                             QString *debugMessage = nullptr);
+    static void findCorrespondingDirectories(const QList<SettingsDirectory> &dirs, QList<JetbrainsApplication *> &apps, QString *debugMessage = nullptr);
 
     /**
      * Sometimes the name of the IDE differs from the name of the config directory, for example:
@@ -48,5 +45,4 @@ public:
     QString name;
 };
 
-
-#endif //JETBRAINSRUNNER_SETTINGSDIRECTORY_H
+#endif // JETBRAINSRUNNER_SETTINGSDIRECTORY_H

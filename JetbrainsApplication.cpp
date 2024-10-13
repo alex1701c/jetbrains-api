@@ -15,29 +15,32 @@
 #include "kservice_version.h" // IWYU pragma: keep
 #include <utility>
 
-JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher, bool shouldNotTrimEdition) :
-        QFileSystemWatcher(nullptr), fileWatcher(fileWatcher), desktopFilePath(desktopFilePath) {
+JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool fileWatcher, bool shouldNotTrimEdition)
+    : QFileSystemWatcher(nullptr)
+    , fileWatcher(fileWatcher)
+    , desktopFilePath(desktopFilePath)
+{
     KConfigGroup config = KSharedConfig::openConfig(desktopFilePath)->group("Desktop Entry");
     iconPath = config.readEntry("Icon");
     executablePath = config.readEntry("Exec");
     name = filterApplicationName(config.readEntry("Name"));
     shortName = QString(name)
-            .remove(QLatin1String(" Edition"))
-            .remove(QLatin1String(" Professional"))
-            .remove(QLatin1String(" Ultimate"))
-            .remove(QLatin1String(" + JBR11"))
-            .remove(QLatin1String(" RC"))
-            .remove(QLatin1String(" EAP"))
-            .replace(QLatin1String("IntelliJ IDEA"), QLatin1String("IntelliJ"))
-            .replace(QLatin1String(" Community"), shouldNotTrimEdition ? QStringLiteral(" CE") : QString());
+                    .remove(QLatin1String(" Edition"))
+                    .remove(QLatin1String(" Professional"))
+                    .remove(QLatin1String(" Ultimate"))
+                    .remove(QLatin1String(" + JBR11"))
+                    .remove(QLatin1String(" RC"))
+                    .remove(QLatin1String(" EAP"))
+                    .replace(QLatin1String("IntelliJ IDEA"), QLatin1String("IntelliJ"))
+                    .replace(QLatin1String(" Community"), shouldNotTrimEdition ? QStringLiteral(" CE") : QString());
 
     // Allow the user to search for both names like Android Studio
     auto nameList = filterApplicationName(QString(name))
-            .remove(QLatin1String(" Professional"))
-            .remove(QLatin1String(" Community"))
-            .remove(QLatin1String(" Ultimate"))
-            .remove(QLatin1String(" Edu"))
-            .split(' ');
+                        .remove(QLatin1String(" Professional"))
+                        .remove(QLatin1String(" Community"))
+                        .remove(QLatin1String(" Ultimate"))
+                        .remove(QLatin1String(" Edu"))
+                        .split(' ');
     if (nameList.count() > 0) {
         nameArray[0] = nameList.at(0);
         if (nameList.count() == 2) {
@@ -49,7 +52,8 @@ JetbrainsApplication::JetbrainsApplication(const QString &desktopFilePath, bool 
     }
 }
 
-void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessage) {
+void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessage)
+{
     // Recent folders are in recentProjectDirectories.xml or in recentProjects.xml located
     // If the method is triggered by the file watcher the content is provided
     QString fileName = file;
@@ -89,7 +93,7 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
 
     JBR_FILE_LOG_APPEND("===== Recently used project folder for " + this->name + "=====")
     if (!recentlyUsed.isEmpty()) {
-        for (const auto &recent: std::as_const(recentlyUsed)) {
+        for (const auto &recent : std::as_const(recentlyUsed)) {
             Q_UNUSED(recent)
             JBR_FILE_LOG_APPEND("    " + recent.path)
         }
@@ -99,20 +103,21 @@ void JetbrainsApplication::parseXMLFile(const QString &file, QString *debugMessa
     JBR_FILE_LOG_APPEND("\n")
 }
 
-void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
-    for (auto &app: std::as_const(apps)) {
+void JetbrainsApplication::parseXMLFiles(QList<JetbrainsApplication *> &apps, QString *debugMessage)
+{
+    for (auto &app : std::as_const(apps)) {
         app->parseXMLFile(QString(), debugMessage);
     }
 }
 
-QList<JetbrainsApplication *>
-JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage) {
+QList<JetbrainsApplication *> JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *debugMessage)
+{
     QList<JetbrainsApplication *> notEmpty;
     JBR_FILE_LOG_APPEND("========== Filter Jetbrains Apps, number of apps: " + QString::number(apps.count()))
-    for (auto const &app: std::as_const(apps)) {
+    for (auto const &app : std::as_const(apps)) {
         if (!app->recentlyUsed.empty()) {
             notEmpty.append(app);
-            JBR_FILE_LOG_APPEND("Found projects for: " + app->name+ " " + QString::number(app->recentlyUsed.count()))
+            JBR_FILE_LOG_APPEND("Found projects for: " + app->name + " " + QString::number(app->recentlyUsed.count()))
         } else {
             JBR_FILE_LOG_APPEND("Found no projects for: " + app->name)
             delete app;
@@ -121,8 +126,8 @@ JetbrainsApplication::filterApps(QList<JetbrainsApplication *> &apps, QString *d
     return notEmpty;
 }
 
-QMap<QString, QString>
-JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMappingConfig, QString *debugMessage) {
+QMap<QString, QString> JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMappingConfig, QString *debugMessage)
+{
     QMap<QString, QString> applicationPaths;
     const KService::List apps = KApplicationTrader::query([debugMessage](const KService::Ptr &service) {
         // Only take test files into account
@@ -172,7 +177,7 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
         }
     }
     JBR_FILE_LOG_APPEND("========= Application path map ==========")
-    for (auto it = applicationPaths.begin(), end=applicationPaths.end(); it != end; ++it) {
+    for (auto it = applicationPaths.begin(), end = applicationPaths.end(); it != end; ++it) {
         JBR_FILE_LOG_APPEND(it.key() + " ==> " + it.value())
     }
     if (applicationPaths.isEmpty()) {
@@ -181,37 +186,34 @@ JetbrainsApplication::getInstalledApplicationPaths(const KConfigGroup &customMap
     return applicationPaths;
 }
 
-QString JetbrainsApplication::filterApplicationName(const QString &name) {
+QString JetbrainsApplication::filterApplicationName(const QString &name)
+{
     const static QRegularExpression versionPostfixRegex(QStringLiteral(" \\d{4}.\\d(.\\d)?"));
     return QString(name)
-            .remove(QLatin1String(" Release"))
-            .remove(QLatin1String(" Edition"))
-            .remove(QLatin1String(" + JBR11"))
-            .remove(QLatin1String(" RC"))
-            .remove(QLatin1String(" EAP"))
-            .remove(versionPostfixRegex);
+        .remove(QLatin1String(" Release"))
+        .remove(QLatin1String(" Edition"))
+        .remove(QLatin1String(" + JBR11"))
+        .remove(QLatin1String(" RC"))
+        .remove(QLatin1String(" EAP"))
+        .remove(versionPostfixRegex);
 }
 
-QString JetbrainsApplication::formatOptionText(const QString &formatText, const Project &project) {
+QString JetbrainsApplication::formatOptionText(const QString &formatText, const Project &project)
+{
     QString txt = QString(formatText)
-            .replace(QLatin1String(FormatString::PROJECT), project.name)
-            .replace(QLatin1String(FormatString::APPNAME), this->name)
-            .replace(QLatin1String(FormatString::APP), this->shortName);
+                      .replace(QLatin1String(FormatString::PROJECT), project.name)
+                      .replace(QLatin1String(FormatString::APPNAME), this->name)
+                      .replace(QLatin1String(FormatString::APP), this->shortName);
     if (txt.contains(QLatin1String(FormatString::DIR))) {
-        txt.replace(QLatin1String(FormatString::DIR),
-                    QString(project.path).replace(QDir::homePath(), QLatin1String("~")));
+        txt.replace(QLatin1String(FormatString::DIR), QString(project.path).replace(QDir::homePath(), QLatin1String("~")));
     }
     return txt;
 }
 
-QDebug operator<<(QDebug d, const JetbrainsApplication *app) {
-    d << " name: " << app->name
-      << " desktopFilePath: " << app->desktopFilePath
-      << " executablePath: " << app->executablePath
-      << " configFolder: " << app->configFolder
-      << " iconPath: " << app->iconPath
-      << " shortName: " << app->shortName
-      << " recentlyUsed: ";
+QDebug operator<<(QDebug d, const JetbrainsApplication *app)
+{
+    d << " name: " << app->name << " desktopFilePath: " << app->desktopFilePath << " executablePath: " << app->executablePath
+      << " configFolder: " << app->configFolder << " iconPath: " << app->iconPath << " shortName: " << app->shortName << " recentlyUsed: ";
     for (const auto &project : std::as_const(app->recentlyUsed)) {
         d << project.name << project.path;
     }
@@ -275,8 +277,9 @@ void JetbrainsApplication::parseNewStyleXMLFile(const QString &fileName)
         double projectOpenTimestamp = metaInfo.lastChildElement("option").attribute("value").toDouble();
         pathTimestampMap.append(qMakePair(path, projectOpenTimestamp));
     }
-    std::sort(pathTimestampMap.begin(), pathTimestampMap.end(),
-          [](QPair<QString, double> &first, QPair<QString, double> &second) { return first.second > second.second; });
+    std::sort(pathTimestampMap.begin(), pathTimestampMap.end(), [](QPair<QString, double> &first, QPair<QString, double> &second) {
+        return first.second > second.second;
+    });
     for (const auto &pair : std::as_const(pathTimestampMap)) {
         addRecentlyUsed(pair.first);
     }
