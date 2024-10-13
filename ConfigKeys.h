@@ -1,7 +1,7 @@
 #ifndef JETBRAINSRUNNER_CONFIGKEYS_H
 #define JETBRAINSRUNNER_CONFIGKEYS_H
 
-#include <qtmetamacros.h>
+#include <QObject>
 
 struct Config {
     constexpr static const auto launchByAppName = "LaunchByAppName";
