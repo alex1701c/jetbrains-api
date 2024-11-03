@@ -13,7 +13,7 @@ include(KDECMakeSettings)
 include(KDEClangFormat)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 
-find_package(KF${QT_MAJOR_VERSION} REQUIRED COMPONENTS Config Service I18n)
+find_package(KF${QT_MAJOR_VERSION} REQUIRED COMPONENTS Config Service)
 find_package(Qt${QT_MAJOR_VERSION} REQUIRED COMPONENTS Xml)
 
 add_library(jetbrains_api_static STATIC JetbrainsApplication.cpp SettingsDirectory.cpp export.cpp)
