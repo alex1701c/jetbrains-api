@@ -195,6 +195,7 @@ QString JetbrainsApplication::filterApplicationName(const QString &name)
         .remove(QLatin1String(" + JBR11"))
         .remove(QLatin1String(" RC"))
         .remove(QLatin1String(" EAP"))
+        .remove(QLatin1String(" Preview"))
         .remove(versionPostfixRegex);
 }
 
