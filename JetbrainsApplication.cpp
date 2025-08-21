@@ -188,7 +188,7 @@ QMap<QString, QString> JetbrainsApplication::getInstalledApplicationPaths(const 
 
 QString JetbrainsApplication::filterApplicationName(const QString &name)
 {
-    const static QRegularExpression versionPostfixRegex(QStringLiteral(" \\d{4}.\\d(.\\d)?"));
+    const static QRegularExpression versionPostfixRegex(QStringLiteral(" \\d{4}\\.\\d(\\.\\d){0,2}"));
     return QString(name)
         .remove(QLatin1String(" Release"))
         .remove(QLatin1String(" Edition"))
