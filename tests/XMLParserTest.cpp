@@ -1,15 +1,19 @@
+#include "../JetbrainsApplication.h"
 #include <QObject>
 #include <QTest>
-#include "../JetbrainsApplication.h"
 
-class XMLParserTest : public QObject {
-Q_OBJECT
+class XMLParserTest : public QObject
+{
+    Q_OBJECT
 public:
-    XMLParserTest(QObject *parent = nullptr) : QObject(parent) {}
-    ~XMLParserTest() {};
+    XMLParserTest(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+    }
 
 private Q_SLOTS:
-    void testRiderXMLParsing(){
+    void testRiderXMLParsing()
+    {
         JetbrainsApplication application(QFINDTESTDATA("data/jetbrains-clion.desktop"));
         application.checkIfProjectsExist = false;
         QCOMPARE(application.name, QStringLiteral("CLion"));
@@ -17,24 +21,24 @@ private Q_SLOTS:
         application.parseXMLFile();
         const QList<Project> projects = application.recentlyUsed;
         QVERIFY(!projects.isEmpty());
-        QStringList expected = {
-          "$USER_HOME$/Projects/Blazor/ComponentLibrary/ComponentLibrary.sln",
-          "$USER_HOME$/UnityProjects/Pentecost/Pentecost.sln",
-          "$USER_HOME$/UnityProjects/tower-defense/tower-defense.sln"
-        };
+        QStringList expected = {"$USER_HOME$/Projects/Blazor/ComponentLibrary/ComponentLibrary.sln",
+                                "$USER_HOME$/UnityProjects/Pentecost/Pentecost.sln",
+                                "$USER_HOME$/UnityProjects/tower-defense/tower-defense.sln"};
         QCOMPARE(projects.size(), expected.size());
-        for(int i = 0; i < projects.size(); ++i) {
+        for (int i = 0; i < projects.size(); ++i) {
             QString expectedPath = expected.at(i);
             expectedPath.replace("$USER_HOME$", QDir::homePath());
             QCOMPARE(projects.at(i).path, expectedPath);
         }
     };
-    void testCLionXMLParsing_data(){
+    void testCLionXMLParsing_data()
+    {
         QTest::addColumn<QString>("configFolder");
         QTest::newRow("old format") << QFINDTESTDATA("data/jetbrains-clion/");
         QTest::newRow("new format") << QFINDTESTDATA("data/jetbrains-clion2020.3/");
     }
-    void testCLionXMLParsing(){
+    void testCLionXMLParsing()
+    {
         QFETCH(QString, configFolder);
         JetbrainsApplication application(QFINDTESTDATA("data/jetbrains-clion.desktop"));
         application.checkIfProjectsExist = false;
@@ -57,7 +61,7 @@ private Q_SLOTS:
             "$USER_HOME$/kde/src/kdeplasma-addons",
         };
         QCOMPARE(projects.size(), expected.size());
-        for(int i = 0; i < projects.size(); ++i) {
+        for (int i = 0; i < projects.size(); ++i) {
             QString expectedPath = expected.at(i);
             expectedPath.replace("$USER_HOME$", QDir::homePath());
             QCOMPARE(projects.at(i).path, expectedPath);
