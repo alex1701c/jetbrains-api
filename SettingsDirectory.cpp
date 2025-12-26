@@ -50,12 +50,12 @@ void SettingsDirectory::findCorrespondingDirectory(const QList<SettingsDirectory
 {
     // Exact match or space in name
     for (const auto &dir : std::as_const(dirs)) {
-        if (dir.name == app->name) {
+        if (dir.name.compare(app->name, Qt::CaseInsensitive) == 0) {
             app->configFolder = getExistingConfigDir(dir.directory);
             JBR_FILE_LOG_APPEND("found config folder " + app->configFolder + " for " + app->name)
             return;
         }
-        if (dir.name == QString(app->name).remove(' ')) {
+        if (dir.name.compare(QString(app->name).remove(' '), Qt::CaseInsensitive) == 0) {
             app->configFolder = getExistingConfigDir(dir.directory);
             JBR_FILE_LOG_APPEND("found config folder " + app->configFolder + " for " + app->name)
             return;
